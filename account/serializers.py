@@ -1,0 +1,121 @@
+# from rest_framework import serializers
+# from django.contrib.auth import get_user_model
+
+# User = get_user_model()
+
+# class RegisterSerializer(serializers.ModelSerializer):
+#     password_confirm = serializers.CharField(write_only=True)
+
+#     class Meta:
+#         model = User
+#         fields = ['phone', 'password', 'password_confirm']
+
+#     def validate(self, data):
+#         if data['password'] != data['password_confirm']:
+#             raise serializers.ValidationError("Passwords do not match.")
+#         return data
+
+#     def create(self, validated_data):
+#         password = validated_data.pop('password')
+#         user = User(phone=validated_data['phone'])
+#         user.set_password(password)
+#         user.create_activation_code()
+#         user.save()
+#         # Send activation code via SMS here
+#         return user
+
+
+
+# serializers.py
+# from rest_framework import serializers
+# from django.contrib.auth import get_user_model
+# from .tasks import send_activation_code
+
+# User = get_user_model()
+
+# class RegisterSerializer(serializers.ModelSerializer):
+#     password_confirm = serializers.CharField(write_only=True)
+
+#     class Meta:
+#         model = User
+#         fields = ['phone_number', 'password', 'password_confirm']  # Изменено на 'phone_number'
+
+#     def validate(self, data):
+#         if data['password'] != data['password_confirm']:
+#             raise serializers.ValidationError("Passwords do not match.")
+#         return data
+
+#     def create(self, validated_data):
+#         password = validated_data.pop('password')
+#         user = User(phone_number=validated_data['phone_number'])  # Изменено на 'phone_number'
+#         user.set_password(password)
+#         user.create_activation_code()  # Убедитесь, что этот метод существует в модели
+#         user.save()
+#         # Запускаем задачу Celery
+#         send_activation_code.delay(user.activation_code, user.phone_number)  # Изменено на 'phone_number'
+#         return user
+
+from typing import Any, Dict
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from .tasks import send_activation_code
+from .models import PhoneNumberVerification
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+
+User = get_user_model()
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password_confirm = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'phone_number', 'password', 'password_confirm']  # Изменено на 'phone_number'
+
+    def validate(self, data):
+        if data['password'] != data['password_confirm']:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(phone_number=validated_data['phone_number'])  # Изменено на 'phone_number'
+        user.set_password(password)
+        user.save()
+
+        # Создаем запись PhoneNumberVerification с активационным кодом
+        verification, created = PhoneNumberVerification.objects.get_or_create(
+            phone_number=user.phone_number
+        )
+        if not created:
+            verification.save()  # Это вызовет метод save(), который создаст новый verification_code
+
+        # Запускаем задачу Celery
+        send_activation_code.delay(verification.verification_code, user.phone_number)  # Изменено на 'phone_number'
+        return user
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        return data
+    
+class CustomTokenObtainPaisSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        # Получаем стандартный токен
+        token = super().get_token(user)
+
+        # Добавляем кастомные поля в токен
+        token['phone_number'] = user.phone_number
+        # Можно добавить другие поля, например:
+        token['is_staff'] = user.is_staff
+        token['is_superuser'] = user.is_superuser
+
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Добавляем дополнительные данные в ответ
+        data['user_id'] = self.user.id
+
+        return data
