@@ -9,8 +9,8 @@ class Category(models.Model):
         return self.category
 
 class Product(models.Model):
-    CHOICE_NEW = 'NEW'
-    CHOICE_USED = 'USED'
+    CHOICE_NEW = 'Новый'
+    CHOICE_USED = 'Б/У'
     
     CHOICE_OPTIONS = [
         (CHOICE_NEW, 'Новый'),
@@ -31,7 +31,7 @@ class Product(models.Model):
     spare_part_number = models.CharField(max_length=50)
     generation = models.CharField(max_length=50)
     choice = models.CharField(
-        max_length=4,
+        max_length=6,
         choices=CHOICE_OPTIONS,
         default=CHOICE_NEW,
     )
