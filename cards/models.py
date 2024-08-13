@@ -9,6 +9,13 @@ class Category(models.Model):
         return self.category
 
 class Product(models.Model):
+    CHOICE_NEW = 'NEW'
+    CHOICE_USED = 'USED'
+    
+    CHOICE_OPTIONS = [
+        (CHOICE_NEW, 'Новый'),
+        (CHOICE_USED, 'БУ'),
+    ]
     image1 = models.ImageField(upload_to="cards/")
     image2 = models.ImageField(upload_to="cards/")
     image3 = models.ImageField(upload_to="cards/")
@@ -23,7 +30,12 @@ class Product(models.Model):
     model = models.CharField(max_length=50)
     spare_part_number = models.CharField(max_length=50)
     generation = models.CharField(max_length=50)
-    created_at = models.DateTimeField(default=datetime.datetime.now)  # Переименованное поле
+    choice = models.CharField(
+        max_length=4,
+        choices=CHOICE_OPTIONS,
+        default=CHOICE_NEW,
+    )
+    created_at = models.DateTimeField(default=datetime.datetime.now) 
 
     def __str__(self):
         return self.title
