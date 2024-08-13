@@ -5,19 +5,17 @@ from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="My API",
-        default_version='v1',
-        description="Test description",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@myapi.local"),
-        license=openapi.License(name="BSD License"),
+        title="Python 23 API",
+        description="makers bootcamp",
+        default_version="v1",
     ),
-    public=True,
+    public=True
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('account.urls')),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0),
-         name='schema-swagger-ui'),
+    path('cards/', include('cards.urls')),
+    path('docs/', schema_view.with_ui("swagger"))
+
 ]
