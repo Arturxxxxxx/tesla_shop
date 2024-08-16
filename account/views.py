@@ -16,29 +16,29 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            user = serializer.save()
+            serializer.save()
             # Отправка SMS с активационным кодом
-            send_sms(user.phone_number, f"Your activation code is: {user.activation_code}")
+            # send_sms(user.phone_number, f"Your code is: {user.verification_code}")
             return Response({'message': 'Successfully registered! Check your phone for activation.'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyCodeView(APIView):
     def post(self, request):
         phone = request.data.get('phone_number')
-        activation_code = request.data.get('activation_code')
+        verification_code = request.data.get('verification_code')
 
-        if not phone or not activation_code:
+        if not phone or not verification_code:
             return Response({"error": "Phone number and activation code are required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(phone_number=phone, activation_code=activation_code)
+            user = User.objects.get(phone_number=phone, verification_code=verification_code)
         except User.DoesNotExist:
             return Response({"error": "Invalid phone number or activation code."}, status=status.HTTP_400_BAD_REQUEST)
 
         if user.is_active:
             return Response({"error": "This account is already activated."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.activation_code = ''  # Очищаем активационный код после успешного подтверждения
+        user.verification_code = ''  # Очищаем активационный код после успешного подтверждения
         user.is_active = True       # Активируем пользователя
         user.save()
 

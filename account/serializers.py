@@ -59,7 +59,7 @@ from typing import Any, Dict
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .tasks import send_activation_code
-from .models import PhoneNumberVerification
+from .models import CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 
 User = get_user_model()
@@ -83,14 +83,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         # Создаем запись PhoneNumberVerification с активационным кодом
-        verification, created = PhoneNumberVerification.objects.get_or_create(
+        verification, created = CustomUser.objects.get_or_create(
             phone_number=user.phone_number
         )
         if not created:
-            verification.save()  # Это вызовет метод save(), который создаст новый verification_code
+            verification.create_verification_code()  # Это вызовет метод save(), который создаст новый verification_code
 
         # Запускаем задачу Celery
         send_activation_code.delay(verification.verification_code, user.phone_number)  # Изменено на 'phone_number'
+        print(verification.verification_code)
         return user
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
