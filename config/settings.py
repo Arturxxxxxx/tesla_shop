@@ -30,8 +30,8 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = ['104.197.92.255']
+# ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'account.CustomUser'
 
 
@@ -173,9 +173,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK =  {
     'DEFAULT_AUTHENTICATION_CLASSES':
-    ('rest_framework_simplejwt.authentication.JWTAuthentication',),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 3
+    ('rest_framework_simplejwt.authentication.JWTAuthentication',)
 }
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
