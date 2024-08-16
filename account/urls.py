@@ -30,6 +30,6 @@ from .views import RegisterView, VerifyCodeView, CustomTokenObtainPairView, Cust
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('verify-code/', VerifyCodeView.as_view(), name='verify-code'),
-    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 ]
