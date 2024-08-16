@@ -5,6 +5,6 @@ staticfiles/
 .venv/
 __pycache__/
 *.pyc
-meida/
+meida
 
 .sendSms.py
