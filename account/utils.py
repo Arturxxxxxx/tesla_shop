@@ -54,8 +54,8 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-def send_sms(phone_number, code):
-    print(code)
+def send_sms(phone_number, verification_code):
+    #print(code)
     
     # Логин для доступа к платформе smspro.nikita.kg.  
     login = config('LOGIN')
@@ -67,7 +67,7 @@ def send_sms(phone_number, code):
     # Имя отправителя - должно быть согласовано с администратором smspro.nikita.kg
     sender = config('SENDER')
     # Текст СМС-сообщения - текст на русском или латинице любой длины (до 800 знаков). 
-    text = code
+    text = verification_code
     # Номер телефона получателя СМС в формате 996ххххххххх. 
     phone = phone_number
 

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',   
     'rest_framework_simplejwt',
     'drf_yasg',
     # app
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -96,10 +98,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAM'),
-        'USER': config('DB_USE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOS'),
+        'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT')
     }
 }
@@ -163,9 +165,14 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
+
 CORS_ALLOWD_ORIGINS = [
-    'localhost:3000'
+    'http://localhost:3000'
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+ORS_ALLOW_HEADERS = ['*']
 
 # config/settings.py
 MEDIA_URL = '/media/'
