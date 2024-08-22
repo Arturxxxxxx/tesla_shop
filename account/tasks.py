@@ -3,10 +3,10 @@ from celery import shared_task
 from .utils import send_sms
 
 @shared_task
-def send_activation_code(activation_code, phone_number):
+def send_activation_code(verification_code, phone_number):
     # message = f"Your activation code is: {activation_code}"
     message = 'print'
-    response = send_sms(phone_number, message)
+    response = send_sms(phone_number, verification_code)
     return response
 # @shared_task
 # def send_activation_code(code, phone_number):
