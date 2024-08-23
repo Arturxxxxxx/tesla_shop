@@ -28,6 +28,7 @@ class Product(models.Model):
     artikul = models.PositiveIntegerField()
     year = models.PositiveIntegerField()
     in_stock = models.BooleanField(default=True)
+    marka = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
     spare_part_number = models.CharField(max_length=50)
     generation = models.CharField(max_length=50)
