@@ -135,3 +135,48 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
             raise serializers.ValidationError('пользователь с таким телефоным номером нету')
         return value
     
+from rest_framework import serializers
+from .models import CustomUser
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=50)
+
+    def validate_phone_number(self, value):
+        if not CustomUser.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("Пользователь с таким номером телефона не найден.")
+        return value
+
+class VerifyResetCodeSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=50)
+    verification_code = serializers.CharField(max_length=6)
+
+    def validate(self, data):
+        try:
+            user = CustomUser.objects.get(phone_number=data['phone_number'], verification_code=data['verification_code'])
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("Неверный номер телефона или код.")
+        
+        if not user.is_code_valid():  # Проверка на истечение срока действия кода
+            raise serializers.ValidationError("Код подтверждения истек.")
+        
+        return data
+    
+class ResetPasswordSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=50)
+    verification_code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Пароли не совпадают.")
+        
+        try:
+            user = CustomUser.objects.get(phone_number=data['phone_number'], verification_code=data['verification_code'])
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("Неверный номер телефона или код подтверждения.")
+        
+        if not user.is_code_valid():
+            raise serializers.ValidationError("Код подтверждения истек.")
+        
+        return data
