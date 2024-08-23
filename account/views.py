@@ -1,6 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 
@@ -10,6 +12,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .utils import send_sms  # Убедитесь, что эта функция импортирована правильно
 
 User = get_user_model()
+
+class UserDetailView(APIView):
+    permission_classes = [IsAuthenticated]  # Требуем аутентификацию для этого view
+
+    def get(self, request):
+        user = request.user  # Получаем текущего пользователя из request
+        serializer = UserSerializer(user)  # Сериализуем данные пользователя
+        return Response(serializer.data)  
 
 class RegisterView(APIView):
     @swagger_auto_schema(request_body=RegisterSerializer())
@@ -49,3 +59,15 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPaisSerializer
+
+class ResendVerificationCodeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        user.create_verification_code()
+        user.save()
+
+        
+

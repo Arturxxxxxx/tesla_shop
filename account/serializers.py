@@ -64,6 +64,12 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 
 User = get_user_model()
 
+class UserSerializer(serializers.ModelSerializer):
+    class  Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'phone_number', 'date_joined', 'is_active']
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True)
 
@@ -87,11 +93,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone_number=user.phone_number
         )
         if not created:
-            verification.create_verification_code()  # Это вызовет метод save(), который создаст новый verification_code
+            verification.create_verification_code()  # Это вызовет метод create_verification_code() который создаст новый verification_code
 
         # Запускаем задачу Celery
         send_activation_code.delay(verification.verification_code, user.phone_number)  # Изменено на 'phone_number'
-        print(verification.verification_code)
+        # print(verification.verification_code)
         return user
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
@@ -120,3 +126,12 @@ class CustomTokenObtainPaisSerializer(TokenObtainPairSerializer):
         data['user_id'] = self.user.id
 
         return data
+    
+class ResendVerificationCodeSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+
+    def validate_phone_number(self, value):
+        if not CustomUser.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError('пользователь с таким телефоным номером нету')
+        return value
+    
