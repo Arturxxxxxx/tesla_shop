@@ -6,6 +6,10 @@
 *__pycache__/
 *.pyc
 meida/
-*/migratons/
+accunt/migratons/
+basket/migratons/
+cards/migratons/
+payment/migratons/
+
 .sendSms.py
 
