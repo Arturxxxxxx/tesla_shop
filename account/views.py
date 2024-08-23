@@ -2,7 +2,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ForgotPasswordSerializer, VerifyResetCodeSerializer, ResetPasswordSerializer
+from .models import CustomUser
+from .tasks import send_activation_code
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 
@@ -70,4 +72,47 @@ class ResendVerificationCodeView(APIView):
         user.save()
 
         
+class ForgotPasswordPhoneView(APIView):
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            phone_number = serializer.validated_data['phone_number']
 
+            # Получаем пользователя
+            user = CustomUser.objects.get(phone_number=phone_number)
+
+            # Генерация нового кода верификации
+            user.create_verification_code()
+            user.save()
+
+            # Отправляем код на телефон пользователя
+            send_activation_code.delay(user.verification_code, user.phone_number)
+
+            return Response({"message": "Код для восстановления пароля отправлен на ваш номер телефона."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VerifyResetCodeView(APIView):
+    def post(self, request):
+        serializer = VerifyResetCodeSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"message": "Код подтвержден. Теперь вы можете задать новый пароль."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ResetPasswordView(APIView):
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            phone_number = serializer.validated_data['phone_number']
+            new_password = serializer.validated_data['new_password']
+
+            # Обновление пароля пользователя
+            user = CustomUser.objects.get(phone_number=phone_number)
+            user.set_password(new_password)
+            user.verification_code = ''  # Очистка кода после успешного сброса пароля
+            user.save()
+
+            return Response({"message": "Пароль успешно изменен."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
