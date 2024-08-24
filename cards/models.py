@@ -8,20 +8,15 @@ class Category(models.Model):
     def __str__(self) -> str:
         return self.category
 
-
 class Product(models.Model):
     CHOICE_NEW = 'Новый'
     CHOICE_USED = 'Б/У'
     
     CHOICE_OPTIONS = [
         (CHOICE_NEW, 'Новый'),
-        (CHOICE_USED, 'БУ'),
+        (CHOICE_USED, 'Б/У'),
     ]
 
-    image1 = models.ImageField(upload_to="cards/")
-    image2 = models.ImageField(upload_to="cards/")
-    image3 = models.ImageField(upload_to="cards/")
-    image4 = models.ImageField(upload_to="cards/")
     title = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
     description = models.TextField(max_length=300)
@@ -30,6 +25,7 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     marka = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
+    marka = models.CharField(max_length=50)
     spare_part_number = models.CharField(max_length=50)
     generation = models.CharField(max_length=50)
     choice = models.CharField(
@@ -38,7 +34,8 @@ class Product(models.Model):
         default=CHOICE_NEW,
     )
     created_at = models.DateTimeField(default=datetime.datetime.now)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)  
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    images = models.JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
         return self.title

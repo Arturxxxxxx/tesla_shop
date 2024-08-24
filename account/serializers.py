@@ -1,60 +1,3 @@
-# from rest_framework import serializers
-# from django.contrib.auth import get_user_model
-
-# User = get_user_model()
-
-# class RegisterSerializer(serializers.ModelSerializer):
-#     password_confirm = serializers.CharField(write_only=True)
-
-#     class Meta:
-#         model = User
-#         fields = ['phone', 'password', 'password_confirm']
-
-#     def validate(self, data):
-#         if data['password'] != data['password_confirm']:
-#             raise serializers.ValidationError("Passwords do not match.")
-#         return data
-
-#     def create(self, validated_data):
-#         password = validated_data.pop('password')
-#         user = User(phone=validated_data['phone'])
-#         user.set_password(password)
-#         user.create_activation_code()
-#         user.save()
-#         # Send activation code via SMS here
-#         return user
-
-
-
-# serializers.py
-# from rest_framework import serializers
-# from django.contrib.auth import get_user_model
-# from .tasks import send_activation_code
-
-# User = get_user_model()
-
-# class RegisterSerializer(serializers.ModelSerializer):
-#     password_confirm = serializers.CharField(write_only=True)
-
-#     class Meta:
-#         model = User
-#         fields = ['phone_number', 'password', 'password_confirm']  # Изменено на 'phone_number'
-
-#     def validate(self, data):
-#         if data['password'] != data['password_confirm']:
-#             raise serializers.ValidationError("Passwords do not match.")
-#         return data
-
-#     def create(self, validated_data):
-#         password = validated_data.pop('password')
-#         user = User(phone_number=validated_data['phone_number'])  # Изменено на 'phone_number'
-#         user.set_password(password)
-#         user.create_activation_code()  # Убедитесь, что этот метод существует в модели
-#         user.save()
-#         # Запускаем задачу Celery
-#         send_activation_code.delay(user.activation_code, user.phone_number)  # Изменено на 'phone_number'
-#         return user
-
 from typing import Any, Dict
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -135,9 +78,6 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
             raise serializers.ValidationError('пользователь с таким телефоным номером нету')
         return value
     
-from rest_framework import serializers
-from .models import CustomUser
-
 class ForgotPasswordSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=50)
 

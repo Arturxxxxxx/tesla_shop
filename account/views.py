@@ -38,6 +38,7 @@ class VerifyCodeView(APIView):
     def post(self, request):
         phone = request.data.get('phone_number')
         verification_code = request.data.get('verification_code')
+        
 
         if not phone or not verification_code:
             return Response({"error": "Phone number and activation code are required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -46,11 +47,17 @@ class VerifyCodeView(APIView):
             user = User.objects.get(phone_number=phone, verification_code=verification_code)
         except User.DoesNotExist:
             return Response({"error": "Invalid phone number or activation code."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Проверка срока действия кода верификации
+        if user.is_expired():
+            return Response({"error": "Verification code has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
 
         if user.is_active:
             return Response({"error": "This account is already activated."}, status=status.HTTP_400_BAD_REQUEST)
 
         user.verification_code = ''  # Очищаем активационный код после успешного подтверждения
+        user.expires_at = None       # Очищаем поле expires_at
         user.is_active = True       # Активируем пользователя
         user.save()
 
@@ -92,13 +99,29 @@ class ForgotPasswordPhoneView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    
 class VerifyResetCodeView(APIView):
     def post(self, request):
         serializer = VerifyResetCodeSerializer(data=request.data)
         if serializer.is_valid():
-            return Response({"message": "Код подтвержден. Теперь вы можете задать новый пароль."}, status=status.HTTP_200_OK)
+            reset_code = serializer.validated_data['reset_code']
+            try:
+                user = CustomUser.objects.get(verification_code=reset_code)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "Invalid reset code."}, status=status.HTTP_400_BAD_REQUEST)
+
+            if user.is_expired():
+                return Response({"error": "Reset code has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Очистка кода сброса и даты истечения
+            user.verification_code = ''  
+            user.expires_at = None
+            user.save()
+
+            return Response({"message": "Reset code is valid and has been cleared. You can now set a new password."}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ResetPasswordView(APIView):
     def post(self, request):
