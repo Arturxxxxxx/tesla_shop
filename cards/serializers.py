@@ -43,6 +43,7 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_category_name(self, obj):
         return obj.category.category
 
+
     def get_image_urls(self, obj):
         request = self.context.get('request')
         return [request.build_absolute_uri(f'/media/{image}') for image in obj.images]
