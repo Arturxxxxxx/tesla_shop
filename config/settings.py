@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     # app
     'account',
     'payment',
+    'cards'
     
     
 ]
