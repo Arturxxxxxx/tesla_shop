@@ -13,6 +13,7 @@ class ProductSerializer(serializers.ModelSerializer):
         required=False
     )
     image_urls = serializers.SerializerMethodField()
+    
     category_name = serializers.SerializerMethodField()
 
     class Meta:
