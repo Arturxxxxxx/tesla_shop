@@ -7,7 +7,9 @@ class CustomUserManager(BaseUserManager):
     def _create_user(self, phone_number, password, **extra):
         if not phone_number:
             raise ValueError('Phone - поле обязательное')
-        user = self.model(phone_number=phone_number, **extra)
+        first_name = extra.get('first_name')
+        last_name = extra.get('last_name')
+        user = self.model(phone_number=phone_number, first_name=first_name, last_name=last_name, **extra)
         user.set_password(password)
         user.save()
         return user

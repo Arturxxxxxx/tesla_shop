@@ -14,11 +14,3 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    parser_classes = (MultiPartParser, FormParser) 
-    def create(self, request, *args, **kwargs):
-        # Handle file upload if necessary
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        # Handle file upload if necessary
-        return super().update(request, *args, **kwargs)

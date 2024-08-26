@@ -1,5 +1,5 @@
 from django.db import models
-import datetime
+from django.utils import timezone
 
 class Category(models.Model):
     image = models.ImageField(upload_to='category/', blank=True, null=True)
@@ -25,7 +25,6 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     marka = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
-    marka = models.CharField(max_length=50)
     spare_part_number = models.CharField(max_length=50)
     generation = models.CharField(max_length=50)
     choice = models.CharField(
@@ -33,7 +32,7 @@ class Product(models.Model):
         choices=CHOICE_OPTIONS,
         default=CHOICE_NEW,
     )
-    created_at = models.DateTimeField(default=datetime.datetime.now)
+    created_at = models.DateTimeField(default=timezone.now)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     images = models.JSONField(default=list, blank=True, null=True)
 

@@ -12,14 +12,14 @@ class ProductSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
-    image_urls = serializers.SerializerMethodField()  # Для отображения URL-ов изображений
-    category_name = serializers.SerializerMethodField()  # Для отображения названия категории
+    image_urls = serializers.SerializerMethodField()
+    category_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
             'id', 'title', 'price', 'description', 'artikul', 'year', 'in_stock',
-            'model', 'spare_part_number', 'generation', 'choice', 'created_at',
+            'model', 'marka', 'spare_part_number', 'generation', 'choice', 'created_at',
             'category', 'category_name', 'images', 'image_urls'
         ]
 
@@ -27,7 +27,6 @@ class ProductSerializer(serializers.ModelSerializer):
         images = validated_data.pop('images', [])
         product = Product.objects.create(**validated_data)
 
-        # Сохраняем изображения как список путей
         image_paths = []
         for image in images:
             path = f'products/{image.name}'
@@ -42,7 +41,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
     def get_category_name(self, obj):
-        return obj.category.category  # Возвращает название категории
+        return obj.category.category
 
     def get_image_urls(self, obj):
         request = self.context.get('request')

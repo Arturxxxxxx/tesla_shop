@@ -27,7 +27,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User(phone_number=validated_data['phone_number'])  # Изменено на 'phone_number'
+        first_name = validated_data.get('first_name')
+        last_name = validated_data.get('last_name')
+        # Создаем пользователя с полями phone_number, first_name и last_name
+        user = User(
+            phone_number=validated_data['phone_number'],
+            first_name=first_name,
+            last_name=last_name
+        )  # Изменено на 'phone_number'
         user.set_password(password)
         user.save()
 
