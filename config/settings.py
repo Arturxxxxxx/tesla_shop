@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     # app
     'account',
-    'cards',
     'payment',
     
     
@@ -192,8 +191,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 REST_FRAMEWORK =  {
     'DEFAULT_AUTHENTICATION_CLASSES':
     ('rest_framework_simplejwt.authentication.JWTAuthentication',),
-    'DEFAULT_PERMISSION_CLASSES': 
-    ('rest_framework.permissions.IsAuthenticated',),
+  
 }
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
