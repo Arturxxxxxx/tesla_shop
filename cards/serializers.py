@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Category, Product
-
+   
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -13,7 +13,7 @@ class ProductSerializer(serializers.ModelSerializer):
         required=False
     )
     image_urls = serializers.SerializerMethodField()
-    
+
     category_name = serializers.SerializerMethodField()
 
     class Meta:
