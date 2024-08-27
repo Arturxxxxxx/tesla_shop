@@ -1,8 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from .models import Category,Product
 from .serializers import CategorySerializer,ProductSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
+
 # Create your views here.
 
 
@@ -15,4 +15,4 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
- 
+
