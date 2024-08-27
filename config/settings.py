@@ -53,11 +53,8 @@ INSTALLED_APPS = [
     # app
     'account',
     'payment',
-<<<<<<< HEAD
-    'cards'
-=======
-    'basket'
->>>>>>> aa98e643848d3bf87f38df222e2ffafce8c83473
+    'cards',
+    'basket',
     
     
 ]
@@ -88,7 +85,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'basket.context_processors.cart',
             ],
         },
     },
@@ -105,10 +101,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAM'),
-        'USER': config('DB_USE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOS'),
+        'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT')
     }
 }

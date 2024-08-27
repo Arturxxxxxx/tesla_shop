@@ -17,7 +17,8 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     def get_total_price(self):
-        return self.product.price * self.quantity
+        total = sum(item.get_total_price() for item in self.items.all())
+        return total
 
     def __str__(self):
         return f'{self.quantity} x {self.product.name}'
