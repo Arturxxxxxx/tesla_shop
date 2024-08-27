@@ -16,7 +16,7 @@ class Product(models.Model):
         (CHOICE_NEW, 'Новый'),
         (CHOICE_USED, 'Б/У'),
     ]
-
+   
     
     title = models.CharField(max_length=250)
     
