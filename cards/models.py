@@ -16,12 +16,8 @@ class Product(models.Model):
         (CHOICE_NEW, 'Новый'),
         (CHOICE_USED, 'Б/У'),
     ]
-   
-    
     title = models.CharField(max_length=250)
-    
     price = models.PositiveIntegerField()
-    
     description = models.TextField(max_length=300)
     artikul = models.PositiveIntegerField()
     year = models.PositiveIntegerField()
