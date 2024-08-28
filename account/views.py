@@ -104,9 +104,9 @@ class VerifyResetCodeView(APIView):
     def post(self, request):
         serializer = VerifyResetCodeSerializer(data=request.data)
         if serializer.is_valid():
-            reset_code = serializer.validated_data['reset_code']
+            verification_code = serializer.validated_data['verification_code']
             try:
-                user = CustomUser.objects.get(verification_code=reset_code)
+                user = CustomUser.objects.get(verification_code=verification_code)
             except CustomUser.DoesNotExist:
                 return Response({"error": "Invalid reset code."}, status=status.HTTP_400_BAD_REQUEST)
 
