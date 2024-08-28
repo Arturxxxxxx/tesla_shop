@@ -34,6 +34,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     images = models.JSONField(default=list, blank=True, null=True)
+   
 
     def __str__(self):
         return self.title

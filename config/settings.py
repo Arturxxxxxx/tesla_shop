@@ -52,9 +52,9 @@ INSTALLED_APPS = [
     'drf_yasg',
     # app
     'account',
-    'cards',
     'payment',
-    'basket'
+    'cards',
+    'basket',
     
     
 ]
@@ -85,7 +85,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'basket.context_processors.cart',
             ],
         },
     },
@@ -102,10 +101,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAM'),
-        'USER': config('DB_USE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOS'),
+        'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT')
     }
 }
@@ -195,8 +194,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 REST_FRAMEWORK =  {
     'DEFAULT_AUTHENTICATION_CLASSES':
     ('rest_framework_simplejwt.authentication.JWTAuthentication',),
-    'DEFAULT_PERMISSION_CLASSES': 
-    ('rest_framework.permissions.IsAuthenticated',),
+  
 }
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
