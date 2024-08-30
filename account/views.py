@@ -11,7 +11,6 @@ from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import RegisterSerializer, CustomTokenRefreshSerializer, CustomTokenObtainPaisSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .utils import send_sms  # Убедитесь, что эта функция импортирована правильно
 
 User = get_user_model()
 

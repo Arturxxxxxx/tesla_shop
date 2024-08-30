@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['104.197.92.255']
 
 
 
+
 AUTH_USER_MODEL = 'account.CustomUser'
 
 
