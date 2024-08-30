@@ -77,14 +77,7 @@ class CustomTokenObtainPaisSerializer(TokenObtainPairSerializer):
 
         return data
     
-class ResendVerificationCodeSerializer(serializers.Serializer):
-    phone_number = serializers.CharField(max_length=15)
 
-    def validate_phone_number(self, value):
-        if not CustomUser.objects.filter(phone_number=value).exists():
-            raise serializers.ValidationError('пользователь с таким телефоным номером нету')
-        return value
-    
 class ForgotPasswordSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=50)
 
@@ -103,10 +96,8 @@ class VerifyResetCodeSerializer(serializers.Serializer):
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Неверный номер телефона или код.")
         
-        if not user.is_code_valid():  # Проверка на истечение срока действия кода
-            raise serializers.ValidationError("Код подтверждения истек.")
-        
         return data
+
     
 class ResetPasswordSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=50)
