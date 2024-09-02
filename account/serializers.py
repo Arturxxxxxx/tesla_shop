@@ -86,17 +86,6 @@ class ForgotPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError("Пользователь с таким номером телефона не найден.")
         return value
 
-class VerifyResetCodeSerializer(serializers.Serializer):
-    phone_number = serializers.CharField(max_length=50)
-    verification_code = serializers.CharField(max_length=6)
-
-    def validate(self, data):
-        try:
-            user = CustomUser.objects.get(phone_number=data['phone_number'], verification_code=data['verification_code'])
-        except CustomUser.DoesNotExist:
-            raise serializers.ValidationError("Неверный номер телефона или код.")
-        
-        return data
 
     
 class ResetPasswordSerializer(serializers.Serializer):
