@@ -10,7 +10,7 @@ class CustomUserManager(BaseUserManager):
         first_name = extra.get('first_name')
         last_name = extra.get('last_name')
         role = extra.get('role')
-        user = self.model(phone_number=phone_number, first_name=first_name, last_name=last_name, role=role **extra)
+        user = self.model(phone_number=phone_number, first_name=first_name, last_name=last_name, role=role, **extra)
         user.set_password(password)
         user.save()
         return user
