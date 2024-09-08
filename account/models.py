@@ -9,7 +9,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Phone - поле обязательное')
         first_name = extra.get('first_name')
         last_name = extra.get('last_name')
-        user = self.model(phone_number=phone_number, first_name=first_name, last_name=last_name, **extra)
+        role = extra.get('role')
+        user = self.model(phone_number=phone_number, first_name=first_name, last_name=last_name, role=role **extra)
         user.set_password(password)
         user.save()
         return user
@@ -37,7 +38,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False) 
-    expires_at = models.DateTimeField(null=True, blank=True)  # Поле для хранения времени истечения срока действия
+    expires_at = models.DateTimeField(null=True, blank=True)
+    role = models.CharField(max_length=50, null=True, blank=True, verbose_name='роль')  # Поле для хранения времени истечения срока действия
      # Required for admin access
 
     USERNAME_FIELD = 'phone_number'
