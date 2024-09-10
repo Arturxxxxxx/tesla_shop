@@ -55,7 +55,7 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
         data = super().validate(attrs)
         return data
     
-class CustomTokenObtainPaisSerializer(TokenObtainPairSerializer):
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         # Получаем стандартный токен
@@ -63,9 +63,9 @@ class CustomTokenObtainPaisSerializer(TokenObtainPairSerializer):
 
         # Добавляем кастомные поля в токен
         token['phone_number'] = user.phone_number
-        # Можно добавить другие поля, например:
         token['is_staff'] = user.is_staff
         token['is_superuser'] = user.is_superuser
+        token['role'] = user.role  # Добавляем поле role
 
         return token
 
@@ -74,6 +74,7 @@ class CustomTokenObtainPaisSerializer(TokenObtainPairSerializer):
 
         # Добавляем дополнительные данные в ответ
         data['user_id'] = self.user.id
+        data['role'] = self.user.role  # Добавляем поле role в ответ
 
         return data
     
