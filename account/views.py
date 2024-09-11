@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 
 
-from .serializers import RegisterSerializer, CustomTokenRefreshSerializer, CustomTokenObtainPaisSerializer
+from .serializers import RegisterSerializer, CustomTokenRefreshSerializer, CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 User = get_user_model()
@@ -66,7 +66,7 @@ class CustomTokenRefreshView(TokenRefreshView):
     serializer_class = CustomTokenRefreshSerializer
 
 class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPaisSerializer
+    serializer_class = CustomTokenObtainPairSerializer
 
 class ResendVerificationCodeView(APIView):
     permission_classes = [IsAuthenticated]
