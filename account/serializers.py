@@ -34,7 +34,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone_number=validated_data['phone_number'],
             first_name=first_name,
             last_name=last_name
-        )  # Изменено на 'phone_number'
+        )  
         user.set_password(password)
         user.save()
 
