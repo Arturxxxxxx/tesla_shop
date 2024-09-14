@@ -33,8 +33,8 @@ class Product(models.Model):
     )
     created_at = models.DateTimeField(default=timezone.now)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    # images = models.JSONField(default=list, blank=True, null=True)
-    image = models.ImageField(upload_to='posts_img', blank=True, verbose_name='Фото')
+    images = models.JSONField(default=list, blank=True, null=True)
+   # images = models.ImageField(upload_to='posts_img', blank=True, verbose_name='Фото')
 
 
     def __str__(self):
