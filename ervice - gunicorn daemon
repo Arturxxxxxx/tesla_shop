@@ -1,0 +1,22 @@
+[0;1;32m●[0m gunicorn.service - gunicorn daemon
+     Loaded: loaded (/etc/systemd/system/gunicorn.service; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (running)[0m since Sun 2024-09-15 09:11:43 UTC; 3min 34s ago
+   Main PID: 403548 (gunicorn)
+      Tasks: 4 (limit: 8992)
+     Memory: 281.7M
+     CGroup: /system.slice/gunicorn.service
+             ├─403548 /home/sanjarkairatkeldiev/tesla_shop/venv/bin/python /home/sanjarkairatkeldiev/tesla_shop/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/sanjarkairatkeldiev/tesla_shop/gunicorn.sock config.wsgi:application
+             ├─403549 /home/sanjarkairatkeldiev/tesla_shop/venv/bin/python /home/sanjarkairatkeldiev/tesla_shop/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/sanjarkairatkeldiev/tesla_shop/gunicorn.sock config.wsgi:application
+             ├─403550 /home/sanjarkairatkeldiev/tesla_shop/venv/bin/python /home/sanjarkairatkeldiev/tesla_shop/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/sanjarkairatkeldiev/tesla_shop/gunicorn.sock config.wsgi:application
+             └─403551 /home/sanjarkairatkeldiev/tesla_shop/venv/bin/python /home/sanjarkairatkeldiev/tesla_shop/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/sanjarkairatkeldiev/tesla_shop/gunicorn.sock config.wsgi:application
+
+Sep 15 09:13:27 coreacenter gunicorn[403549]:   File "/home/sanjarkairatkeldiev/tesla_shop/venv/lib/python3.12/site-packages/drf_yasg/inspectors/field.py", line 91, in field_to_swagger_object
+Sep 15 09:13:27 coreacenter gunicorn[403549]:     raise SwaggerGenerationError("cannot instantiate nested serializer as " + swagger_object_type.__name__)
+Sep 15 09:13:27 coreacenter gunicorn[403549]: drf_yasg.errors.SwaggerGenerationError: cannot instantiate nested serializer as Items
+Sep 15 09:13:27 coreacenter gunicorn[403549]:  - - [15/Sep/2024:09:13:27 +0000] "GET /swagger/?format=openapi HTTP/1.0" 500 194503 "-" "swagger-validator"
+Sep 15 09:13:48 coreacenter gunicorn[403549]: Not Found: /
+Sep 15 09:13:48 coreacenter gunicorn[403549]:  - - [15/Sep/2024:09:13:48 +0000] "GET / HTTP/1.0" 404 2753 "-" "python-requests/2.32.2"
+Sep 15 09:14:44 coreacenter gunicorn[403549]: Not Found: /.env
+Sep 15 09:14:44 coreacenter gunicorn[403549]:  - - [15/Sep/2024:09:14:44 +0000] "GET /.env HTTP/1.0" 404 2783 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
+Sep 15 09:14:44 coreacenter gunicorn[403549]: Not Found: /
+Sep 15 09:14:44 coreacenter gunicorn[403549]:  - - [15/Sep/2024:09:14:44 +0000] "POST / HTTP/1.0" 404 2754 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
