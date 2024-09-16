@@ -1,11 +1,13 @@
 from django.db import models
+from django.core.validators import MaxLengthValidator
 import datetime
+
 
 class Category(models.Model):
     image = models.ImageField(upload_to='category/', blank=True, null=True)
     category = models.CharField(max_length=50, unique=True, verbose_name="Категория")
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.category
 
 
@@ -19,12 +21,12 @@ class Product(models.Model):
     ]
 
     image1 = models.ImageField(upload_to="cards/")
-    image2 = models.ImageField(upload_to="cards/")
-    image3 = models.ImageField(upload_to="cards/")
-    image4 = models.ImageField(upload_to="cards/")
-    title = models.CharField(max_length=255)
+    image2 = models.ImageField(upload_to="cards/", blank=True, null=True)
+    image3 = models.ImageField(upload_to="cards/", blank=True, null=True)
+    image4 = models.ImageField(upload_to="cards/", blank=True, null=True)
+    title = models.CharField(max_length=30)
     price = models.PositiveIntegerField()
-    description = models.TextField(max_length=300)
+    description = models.TextField(validators=[MaxLengthValidator(300)])
     artikul = models.PositiveIntegerField()
     year = models.PositiveIntegerField()
     in_stock = models.BooleanField(default=True)
@@ -36,8 +38,9 @@ class Product(models.Model):
         choices=CHOICE_OPTIONS,
         default=CHOICE_NEW,
     )
-    created_at = models.DateTimeField(default=datetime.datetime.now)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)  
+    created_at = models.DateTimeField(auto_now_add=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    marka = models.CharField(max_length=50, verbose_name='марка')  
 
     def __str__(self):
         return self.title
