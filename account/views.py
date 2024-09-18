@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 
 
-from .serializers import RegisterSerializer, CustomTokenRefreshSerializer, CustomTokenObtainPairSerializer
+from .serializers import RegisterSerializer, CustomTokenRefreshSerializers, CustomTokenObtainPairSerializers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 User = get_user_model()
@@ -63,10 +63,10 @@ class VerifyCodeView(APIView):
         return Response({"message": "Account successfully activated!"}, status=status.HTTP_200_OK)
 
 class CustomTokenRefreshView(TokenRefreshView):
-    serializer_class = CustomTokenRefreshSerializer
+    serializer_class = CustomTokenRefreshSerializers
 
 class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+    serializer_class = CustomTokenObtainPairSerializers
 
 class ResendVerificationCodeView(APIView):
     permission_classes = [IsAuthenticated]

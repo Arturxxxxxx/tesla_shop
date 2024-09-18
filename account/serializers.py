@@ -50,12 +50,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         # print(verification.verification_code)
         return user
 
-class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+class CustomTokenRefreshSerializers(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         return data
     
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomTokenObtainPairSerializers(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         # Получаем стандартный токен
@@ -68,6 +68,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['role'] = user.role  # Добавляем поле role
 
         return token
+
 
     def validate(self, attrs):
         data = super().validate(attrs)
