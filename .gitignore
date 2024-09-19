@@ -5,11 +5,11 @@
 *.venv/
 *__pycache__/
 *.pyc
-meida/
-accunt/migratons/
-basket/migratons/
-cards/migratons/
-payment/migratons/
+*meida/
+*accunt/migratons/
+*basket/migratons/
+*cards/migratons/
+*payment/migratons/
 
-.sendSms.py
+*.sendSms.py
 
