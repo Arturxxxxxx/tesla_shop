@@ -1,15 +1,25 @@
-*venv/
+# Исключение каталога виртуальной среды
+.venv/
 *.env
-*.vscode/
-*staticfiles/
-*.venv/
-*__pycache__/
-*.pyc
-*meida/
-*accunt/migratons/
-*basket/migratons/
-*cards/migratons/
-*payment/migratons/
 
-*.sendSms.py
+# Исключение настроек редактора
+.vscode/
+
+# Исключение скомпилированных и временных файлов
+__pycache__/
+*.pyc
+
+# Исключение статических и медиафайлов
+staticfiles/
+media/
+
+# Исключение миграций
+account/migrations/
+basket/migrations/
+cards/migrations/
+payment/migrations/
+
+# Исключение конкретного файла
+sendSms.py
+
 
