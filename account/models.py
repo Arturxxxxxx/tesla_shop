@@ -31,6 +31,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    role = models.CharField(max_length=50, null=True, blank=True) 
     first_name = models.CharField(max_length=30, verbose_name='имя', blank=True, null=True)
     last_name = models.CharField(max_length=30, verbose_name='фамилия', blank=True, null=True)
     phone_number = models.CharField(max_length=50, unique=True)
@@ -39,7 +40,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False) 
     expires_at = models.DateTimeField(null=True, blank=True)
-    role = models.CharField(max_length=50, null=True, blank=True, verbose_name='роль')  # Поле для хранения времени истечения срока действия
+ # Поле для хранения времени истечения срока действия
      # Required for admin access
 
     USERNAME_FIELD = 'phone_number'

@@ -10,7 +10,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class  Meta:
         model = User
-        fields = ['first_name', 'last_name', 'phone_number', 'date_joined', 'is_active']
+        fields = ['first_name', 'last_name', 'phone_number', 'date_joined', 'is_active', 'role']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -60,26 +60,26 @@ class CustomTokenObtainPairSerializers(TokenObtainPairSerializer):
     def get_token(cls, user):
         # Получаем стандартный токен
         token = super().get_token(user)
+        print('role')
+        print(f"User role: {user.role}")  # Проверка значения поля role
 
         # Добавляем кастомные поля в токен
-        token['phone_number'] = user.phone_number
-        token['is_staff'] = user.is_staff
-        token['is_superuser'] = user.is_superuser
-        token['role'] = user.role  # Добавляем поле role
+        # token['phone_number'] = user.phone_number
+        token['role'] = user.role   # Добавляем поле role
 
         return token
 
 
-    def validate(self, attrs):
-        data = super().validate(attrs)
+    # def validate(self, attrs):
+    #     data = super().validate(attrs)
 
-        # Добавляем дополнительные данные в ответ
-        data['user_id'] = self.user.id
-        data['role'] = self.user.role  # Добавляем поле role в ответ
+    #     # Добавляем дополнительные данные в ответ
+    #     # data['user_id'] = self.user.id
+    #     # data['role'] = self.user.role  # Добавляем поле role в ответ
 
-        return data
+    #     return data
+
     
-
 class ForgotPasswordSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=50)
 
