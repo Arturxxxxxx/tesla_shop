@@ -1,9 +1,10 @@
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated 
 from rest_framework.response import Response
 from .models import Cart, CartItem
 from .serializers import CartSerializer, CartItemSerializer
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 
 class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
@@ -12,6 +13,10 @@ class CartViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Возвращаем корзину только текущего пользователя
         return Cart.objects.filter(user=self.request.user)
+    
+    def list(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied("Пожалуйста, войдите в систему, чтобы просмотреть корзину.")
 
     def create(self, request, *args, **kwargs):
         # Проверка, есть ли у пользователя корзина
@@ -37,6 +42,11 @@ class CartItemViewSet(viewsets.ModelViewSet):
         # Возвращаем товары корзины текущего пользователя
         cart = get_object_or_404(Cart, user=self.request.user)
         return CartItem.objects.filter(cart=cart)
+    
+    def list(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied("Пожалуйста, войдите в систему, чтобы просмотреть товары в корзине.")
+        return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         cart = get_object_or_404(Cart, user=self.request.user)
