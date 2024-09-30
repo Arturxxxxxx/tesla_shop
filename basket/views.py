@@ -1,58 +1,67 @@
-from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Cart, CartItem
-from .serializers import CartSerializer, CartItemSerializer
-from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import PermissionDenied
+from rest_framework import status
+from .models import Basket as BasketModel, BasketItem
+from cards.models import Product
+from .serializers import BasketSerializer
 
-class CartViewSet(viewsets.ModelViewSet):
-    serializer_class = CartSerializer
+class DeleteBasketItemView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        # Возвращаем корзину только текущего пользователя
-        return Cart.objects.filter(user=self.request.user)
-    
-    def list(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            raise PermissionDenied("Пожалуйста, войдите в систему, чтобы просмотреть корзину.")
+    def delete(self, request, product_id):
+        try:
+            basket = request.user.basket
+            item = basket.items.get(product_id=product_id)
+            item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except BasketItem.DoesNotExist:
+            return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+        except BasketModel.DoesNotExist:
+            return Response({"error": "Basket not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    def create(self, request, *args, **kwargs):
-        # Проверка, есть ли у пользователя корзина
-        cart, created = Cart.objects.get_or_create(user=request.user)
-        return Response(CartSerializer(cart).data)
-
-    def update(self, request, *args, **kwargs):
-        cart = self.get_queryset().first()
-        if not cart:
-            return Response({'error': 'Корзина не найдена'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(cart, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CartItemViewSet(viewsets.ModelViewSet):
-    serializer_class = CartItemSerializer
+class BasketView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        # Возвращаем товары корзины текущего пользователя
-        cart = get_object_or_404(Cart, user=self.request.user)
-        return CartItem.objects.filter(cart=cart)
-    
-    def list(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            raise PermissionDenied("Пожалуйста, войдите в систему, чтобы просмотреть товары в корзине.")
-        return super().list(request, *args, **kwargs)
+    def get(self, request):
+        basket = request.user.basket
+        items = basket.items.all()
+        
+        # Получаем общее количество товаров
+        total_items_count = sum(item.quantity for item in items)
 
-    def perform_create(self, serializer):
-        cart = get_object_or_404(Cart, user=self.request.user)
-        serializer.save(cart=cart)
+        serializer = BasketSerializer(basket, context={'request': request})
+        
+        # Возвращаем сериализованные данные и общее количество товаров
+        return Response({
+            "basket": serializer.data,
+            "total_items_count": total_items_count,
+        })
 
-    def destroy(self, request, *args, **kwargs):
-        item = self.get_object()
-        item.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def post(self, request):
+        product_id = request.data.get("product")
+        quantity = request.data.get("quantity", 1)
+
+        if not product_id:
+            return Response({"error": "Product ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if quantity < 1:
+            return Response({"error": "Quantity must be greater than 0."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        basket, _ = BasketModel.objects.get_or_create(user=request.user)
+        basket_item, created = BasketItem.objects.get_or_create(basket=basket, product=product)
+
+        if created:
+            basket_item.quantity = quantity
+        else:
+            basket_item.quantity += quantity
+        
+        basket_item.save()
+
+        serializer = BasketSerializer(basket, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

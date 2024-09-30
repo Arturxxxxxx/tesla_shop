@@ -1,11 +1,8 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import CartViewSet, CartItemViewSet
-
-router = DefaultRouter()
-router.register(r'cart', CartViewSet, basename='cart')
-router.register(r'cart-items', CartItemViewSet, basename='cart-items')
+from django.urls import path
+from .views import BasketView,DeleteBasketItemView
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', BasketView.as_view(), name='basket'),  # URL to view the basket
+    path('item/<int:product_id>/', DeleteBasketItemView.as_view(), name='delete_basket_item'),
+
 ]
