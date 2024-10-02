@@ -5,10 +5,9 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
-from rest_framework.routers import DefaultRouter
 
-router = DefaultRouter()
-router.register()
+
+
 
 schema_view = get_schema_view(
     openapi.Info(
