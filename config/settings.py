@@ -21,9 +21,6 @@ EMAIL_HOST_USER = config('EMAIL_USER')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-STRIPE_TEST_PUBLIC_KEY = config('PUBLIC_KEY')
-STRIPE_TEST_SECRET_KEY = config('SECRET_KEY_STRIPE')
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 

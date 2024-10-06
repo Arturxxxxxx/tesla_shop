@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from .serializers import PaymentSerializer
 from .models import Payment
 
-stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+
 
 class PaymentView(APIView):
     def post(self, request):
