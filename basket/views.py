@@ -24,19 +24,13 @@ class BasketView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        basket = request.user.basket
-        items = basket.items.all()
-        
-        # Получаем общее количество товаров
-        total_items_count = sum(item.quantity for item in items)
+        try:
+            basket = request.user.basket
+        except BasketModel.DoesNotExist:
+            return Response({"error": "Basket not found"}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = BasketSerializer(basket, context={'request': request})
-        
-        # Возвращаем сериализованные данные и общее количество товаров
-        return Response({
-            "basket": serializer.data,
-            "total_items_count": total_items_count,
-        })
+        return Response(serializer.data)
 
     def post(self, request):
         product_id = request.data.get("product")
@@ -60,7 +54,7 @@ class BasketView(APIView):
             basket_item.quantity = quantity
         else:
             basket_item.quantity += quantity
-        
+
         basket_item.save()
 
         serializer = BasketSerializer(basket, context={'request': request})
