@@ -11,8 +11,8 @@ class BasketItemSerializer(serializers.ModelSerializer):
 
 class BasketSerializer(serializers.ModelSerializer):
     items = BasketItemSerializer(many=True, read_only=True)
-    total_price = serializers.DecimalField(source='total_price', max_digits=10, decimal_places=2, read_only=True)
-    total_item_count = serializers.IntegerField(source='total_item_count', read_only=True)
+    total_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    total_item_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Basket
