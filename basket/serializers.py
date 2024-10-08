@@ -11,9 +11,8 @@ class BasketItemSerializer(serializers.ModelSerializer):
 
 class BasketSerializer(serializers.ModelSerializer):
     items = BasketItemSerializer(many=True, read_only=True)
-    total_price = serializers.DecimalField(source='total_price', max_digits=10, decimal_places=2, read_only=True)
-    total_item_count = serializers.IntegerField(source='total_item_count', read_only=True)
+    total_price = serializers.ReadOnlyField()  # Add the total_price field
 
     class Meta:
         model = Basket
-        fields = ['user', 'items', 'created_at', 'updated_at', 'total_price', 'total_item_count']
+        fields = ['user', 'items', 'created_at', 'updated_at', 'total_price']  # Include total_price in fields
