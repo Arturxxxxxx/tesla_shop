@@ -16,8 +16,8 @@ class Product(models.Model):
     CHOICE_USED = 'Б/У'
     
     CHOICE_OPTIONS = [
-        (CHOICE_NEW, 'Новый'),
-        (CHOICE_USED, 'БУ'),
+        (CHOICE_NEW),
+        (CHOICE_USED),
     ]
 
     image1 = models.ImageField(upload_to="cards/")
@@ -27,7 +27,7 @@ class Product(models.Model):
     title = models.CharField(max_length=30)
     price = models.PositiveIntegerField()
     description = models.TextField(validators=[MaxLengthValidator(300)])
-    artikul = models.PositiveIntegerField()
+    artikul = models.CharField(max_length=30, blank=True, null=True)
     year = models.PositiveIntegerField()
     in_stock = models.BooleanField(default=True)
     model = models.CharField(max_length=50)

@@ -1,4 +1,3 @@
-from typing import Any, Dict
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .tasks import send_activation_code
@@ -68,17 +67,6 @@ class CustomTokenObtainPairSerializers(TokenObtainPairSerializer):
         token['role'] = user.role   # Добавляем поле role
 
         return token
-
-
-    # def validate(self, attrs):
-    #     data = super().validate(attrs)
-
-    #     # Добавляем дополнительные данные в ответ
-    #     # data['user_id'] = self.user.id
-    #     # data['role'] = self.user.role  # Добавляем поле role в ответ
-
-    #     return data
-
     
 class ForgotPasswordSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=50)
