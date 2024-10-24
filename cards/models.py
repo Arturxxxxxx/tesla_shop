@@ -16,8 +16,8 @@ class Product(models.Model):
     CHOICE_USED = 'Б/У'
     
     CHOICE_OPTIONS = [
-        (CHOICE_NEW),
-        (CHOICE_USED),
+        (CHOICE_NEW, 'Новый'),
+        (CHOICE_USED, 'БУ'),
     ]
 
     image1 = models.ImageField(upload_to="cards/")
