@@ -280,7 +280,7 @@ def create_payment_session(account, products, total_amount):
             status="pending",
             valid_through=timezone.now() + timezone.timedelta(minutes=10),  # Примерное время истечения
             amount=total_amount,
-            currency="RUB",
+            currency="KGS",
         )
 
         # Создаем связь с продуктами (если нужно)
