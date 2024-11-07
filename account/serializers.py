@@ -9,7 +9,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class  Meta:
         model = User
-        fields = ['first_name', 'last_name', 'phone_number', 'date_joined', 'is_active', 'role']
+        fields = ['first_name', 'last_name', 'phone_number', 'date_joined', 'is_active', 'role', 'country']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'phone_number', 'password', 'password_confirm']  # Изменено на 'phone_number'
+        fields = ['first_name', 'last_name', 'phone_number', 'password', 'password_confirm', 'country']  # Изменено на 'phone_number'
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -28,11 +28,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         first_name = validated_data.get('first_name')
         last_name = validated_data.get('last_name')
+        country = validated_data.get('country')
         # Создаем пользователя с полями phone_number, first_name и last_name
         user = User(
             phone_number=validated_data['phone_number'],
             first_name=first_name,
-            last_name=last_name
+            last_name=last_name,
+            country=country
         )  
         user.set_password(password)
         user.save()

@@ -31,6 +31,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    country = models.CharField(max_length=10, verbose_name='страна')
     role = models.CharField(max_length=50, null=True, blank=True) 
     first_name = models.CharField(max_length=30, verbose_name='имя', null=True, blank=True)
     last_name = models.CharField(max_length=30, verbose_name='фамилия', blank=True, null=True)
@@ -63,28 +64,3 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return f"{self.phone_number} - {self.verification_code}"
-
-
-
-
-# class PhoneNumberVerification(models.Model):
-#     phone_number = models.CharField(max_length=15, unique=True)
-#     verification_code = models.CharField(max_length=6)
-#     created_at = models.DateTimeField(auto_now_add=True)
-    # expires_at = models.DateTimeField(null=True, blank=True)  # Поле для хранения времени истечения срока действия
-
-#     def is_expired(self):
-#         return timezone.now() > self.expires_at
-    
-#     def save(self, *args, **kwargs):
-#         if not self.verification_code:
-#             self.verification_code = get_random_string(length=6, allowed_chars='0123456789')
-#         if not self.expires_at:
-#             self.expires_at = timezone.now() + timezone.timedelta(minutes=10)  # Установить время истечения срока действия
-#         super().save(*args, **kwargs)
-
-#     def is_code_valid(self):
-#         return timezone.now() < self.expires_at
-
-#     def __str__(self):
-#         return f"{self.phone_number} - {self.verification_code}"
