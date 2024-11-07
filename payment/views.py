@@ -50,7 +50,8 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views import View
-from .models import Account, Product
+from cards.models import Product
+from account.models import CustomUser
 from .utils import create_payment_session, check_payment_status
 from decouple import config
 import logging
@@ -63,21 +64,52 @@ PAYLER_KEY = config('PAYLER_KEY')
 logger = logging.getLogger(__name__)
 
 
+# class StartPaymentSessionView(View):
+#     def post(self, request, product_id):
+#         account = get_object_or_404(CustomUser, user=request.user)
+#         product = get_object_or_404(Product, id=product_id)
+#         try:
+#             payment_session, acs_url, pareq = create_payment_session(account, product)
+#             pay_url = f"https://{PAYLER_HOST}/gapi/Pay?session_id={payment_session.session_id}"
+
+#             if acs_url and pareq:
+#                 # Требуется 3DS, возвращаем URL и параметры для 3DS
+#                 return JsonResponse({"3ds_url": acs_url, "pareq": pareq})
+#             else:
+#                 return JsonResponse({"pay_url": pay_url})
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=400)
+
 class StartPaymentSessionView(View):
-    def post(self, request, product_id):
-        account = get_object_or_404(Account, user=request.user)
-        product = get_object_or_404(Product, id=product_id)
+    def post(self, request):
+        # Получаем список выбранных продуктов через POST-запрос
+        product_ids = request.data.get("product_ids", [])  # В случае POST-запроса это будет список ID продуктов
+        account = get_object_or_404(CustomUser, user=request.user)
+
+        # Получаем продукты по их ID и фильтруем по активности
+        products = Product.objects.filter(id__in=product_ids, is_active=True)
+
+        if not products:
+            return JsonResponse({"error": "No active products found"}, status=400)
+
+        # Рассчитываем общую сумму для всех выбранных продуктов
+        total_amount = sum(product.price for product in products)
+
+        # Генерируем уникальный order_id для всех продуктов
+        # order_id = f"order_{account.user.id}_{'_'.join(str(product.id) for product in products)}"
+
+        # Создаём платежную сессию
         try:
-            payment_session, acs_url, pareq = create_payment_session(account, product)
+            payment_session = create_payment_session(account, products, total_amount)
+
+            # Генерация URL для перехода к оплате
             pay_url = f"https://{PAYLER_HOST}/gapi/Pay?session_id={payment_session.session_id}"
 
-            if acs_url and pareq:
-                # Требуется 3DS, возвращаем URL и параметры для 3DS
-                return JsonResponse({"3ds_url": acs_url, "pareq": pareq})
-            else:
-                return JsonResponse({"pay_url": pay_url})
+            return JsonResponse({"pay_url": pay_url})
+
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
 
 class PaymentStatusView(View):
     def get(self, request, session_id):

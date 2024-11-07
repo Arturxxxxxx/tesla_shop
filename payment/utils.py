@@ -172,42 +172,44 @@ def generate_order_id():
     """Генерирует уникальный order_id для каждого платежа."""
     return f"order_{get_random_string(12)}"
 
-def create_payment_session(account, product):
-    """
-    Создаёт платёжную сессию с Payler для указанного аккаунта и продукта.
-    """
-    order_id = generate_order_id()
-    url = f"https://{PAYLER_HOST}/gapi/StartSession"
-    data = {
-        "key": PAYLER_API_KEY,
-        "type": "OneStep",
-        "order_id": order_id,
-        "amount": int(product.price * 100),  # Payler требует сумму в минимальных единицах (копейках)
-        "currency": "RUB",
-        "product": product.name,
-        "return_url_success": "https://yourdomain.com/success",
-        "return_url_decline": "https://yourdomain.com/decline",
-    }
-    response = requests.post(url, data=data)
-    response_data = response.json()
-    
-    # Логирование ответа
-    logger.info(f"Ответ от Payler для создания сессии: {response_data}")
+# def create_payment_session(account, product):
 
-    if response_data.get("session_id"):
-        payment_session = PaymentSession.objects.create(
-            account=account,
-            product=product,
-            session_id=response_data["session_id"],
-            order_id=order_id,
-            status="pending",
-            valid_through=timezone.now() + timezone.timedelta(minutes=10),  # Примерное время истечения
-            amount=product.price,
-            currency="RUB",
-        )
-        return payment_session
-    else:
-        raise Exception("Failed to create payment session")
+    
+#     """
+#     Создаёт платёжную сессию с Payler для указанного аккаунта и продукта.
+#     """
+#     order_id = generate_order_id()
+#     url = f"https://{PAYLER_HOST}/gapi/StartSession"
+#     data = {
+#         "key": PAYLER_API_KEY,
+#         "type": "OneStep",
+#         "order_id": order_id,
+#         "amount": int(product.price * 100),  # Payler требует сумму в минимальных единицах (копейках)
+#         "currency": "RUB",
+#         "product": product.name,
+#         "return_url_success": "https://koreacenter.kg/success",
+#         "return_url_decline": "https://koreacenter.kg/decline",
+#     }
+#     response = requests.post(url, data=data)
+#     response_data = response.json()
+    
+#     # Логирование ответа
+#     logger.info(f"Ответ от Payler для создания сессии: {response_data}")
+
+#     if response_data.get("session_id"):
+#         payment_session = PaymentSession.objects.create(
+#             account=account,
+#             product=product,
+#             session_id=response_data["session_id"],
+#             order_id=order_id,
+#             status="pending",
+#             valid_through=timezone.now() + timezone.timedelta(minutes=10),  # Примерное время истечения
+#             amount=product.price,
+#             currency="RUB",
+#         )
+#         return payment_session
+#     else:
+#         raise Exception("Failed to create payment session")
 
 def check_payment_status(session_id):
     """
@@ -236,3 +238,55 @@ def check_payment_status(session_id):
         return "failed"
     else:
         return "pending"
+
+
+
+
+def create_payment_session(account, products, total_amount):
+    """
+    Создаёт платёжную сессию с Payler для указанного аккаунта и списка продуктов.
+    """
+    order_id = generate_order_id()  # Генерация уникального идентификатора заказа
+    url = f"https://{PAYLER_HOST}/gapi/StartSession"
+    
+    
+    # Формируем строку с названиями всех продуктов
+    product_names = ', '.join(product.title for product in products)
+    
+    # Отправляем запрос в Payler
+    data = {
+        "key": PAYLER_API_KEY,
+        "type": "OneStep",
+        "order_id": order_id,
+        "amount": int(total_amount * 100),  # Payler требует сумму в минимальных единицах (копейках)
+        "currency": "KGS",
+        "product": product_names,  # Передаем все продукты в виде строки
+        "return_url_success": "https://koreacenter.kg/success",
+        "return_url_decline": "https://koreacenter.kg/decline",
+    }
+
+    response = requests.post(url, data=data)
+    response_data = response.json()
+    
+    # Логирование ответа от Payler
+    logger.info(f"Ответ от Payler для создания сессии: {response_data}")
+
+    if response_data.get("session_id"):
+        # Создаем сессию платежа для всех выбранных продуктов
+        payment_session = PaymentSession.objects.create(
+            account=account,
+            session_id=response_data["session_id"],
+            order_id=order_id,
+            status="pending",
+            valid_through=timezone.now() + timezone.timedelta(minutes=10),  # Примерное время истечения
+            amount=total_amount,
+            currency="RUB",
+        )
+
+        # Создаем связь с продуктами (если нужно)
+        payment_session.products.set(products)  # Если вы используете Many-to-Many связь
+        payment_session.save()
+
+        return payment_session
+    else:
+        raise Exception("Failed to create payment session")
