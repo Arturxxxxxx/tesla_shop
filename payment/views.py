@@ -85,7 +85,7 @@ class StartPaymentSessionView(APIView):
     def post(self, request):
         # Получаем список выбранных продуктов через POST-запрос
         product_ids = request.data.get("product_ids", [])  # В случае POST-запроса это будет список ID продуктов
-        account = get_object_or_404(CustomUser, user=request.user)
+        account = get_object_or_404(CustomUser, id=request.id)
 
         # Получаем продукты по их ID и фильтруем по активности
         products = Product.objects.filter(id__in=product_ids, is_active=True)
