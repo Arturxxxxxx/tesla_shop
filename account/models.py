@@ -31,7 +31,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    country = models.CharField(max_length=10, verbose_name='страна')
+    country = models.CharField(max_length=10, verbose_name='страна', null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True) 
     first_name = models.CharField(max_length=30, verbose_name='имя', null=True, blank=True)
     last_name = models.CharField(max_length=30, verbose_name='фамилия', blank=True, null=True)
