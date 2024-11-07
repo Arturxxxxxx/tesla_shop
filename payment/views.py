@@ -46,10 +46,11 @@
 #             return JsonResponse(data, status=200)
 #         else:
 #             return JsonResponse(data, status=response.status_code)
-
+from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views import View
+from rest_framework.views import APIView
 from cards.models import Product
 from account.models import CustomUser
 from .utils import create_payment_session, check_payment_status
@@ -80,7 +81,7 @@ logger = logging.getLogger(__name__)
 #         except Exception as e:
 #             return JsonResponse({"error": str(e)}, status=400)
 
-class StartPaymentSessionView(View):
+class StartPaymentSessionView(APIView):
     def post(self, request):
         # Получаем список выбранных продуктов через POST-запрос
         product_ids = request.data.get("product_ids", [])  # В случае POST-запроса это будет список ID продуктов
@@ -111,13 +112,13 @@ class StartPaymentSessionView(View):
             return JsonResponse({"error": str(e)}, status=400)
 
 
-class PaymentStatusView(View):
+class PaymentStatusView(APIView):
     def get(self, request, session_id):
         status = check_payment_status(session_id)
         return JsonResponse({"status": status})
 
 
-class FindSessionView(View):
+class FindSessionView(APIView):
     def get(self, request, order_id):
         """
         Находит платежную сессию по order_id, отправляя запрос в Payler API.
