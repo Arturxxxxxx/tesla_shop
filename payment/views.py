@@ -88,7 +88,7 @@ class StartPaymentSessionView(APIView):
         account = get_object_or_404(CustomUser, id=request.user.id)
 
         # Получаем продукты по их ID и фильтруем по активности
-        products = Product.objects.filter(id__in=product_ids, is_active=True)
+        products = Product.objects.filter(id__in=product_ids, in_stock=True)
 
         if not products:
             return JsonResponse({"error": "No active products found"}, status=400)
