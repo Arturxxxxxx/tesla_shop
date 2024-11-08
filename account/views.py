@@ -112,10 +112,10 @@ class VerifyResetCodeView(APIView):
             if user.is_expired():
                 return Response({"error": "Reset code has expired."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # # Очистка кода сброса и даты истечения
-            # user.verification_code = ''  
-            # user.expires_at = None
-            # user.save()
+            # Очистка кода сброса и даты истечения
+            user.verification_code = ''  
+            user.expires_at = None
+            user.save()
 
             return Response({"message": "Reset code is valid and has been cleared. You can now set a new password."}, status=status.HTTP_200_OK)
 
