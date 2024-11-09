@@ -89,7 +89,7 @@ def create_payment_session(account, products, total_amount):
             amount=total_amount,
             currency="KGS",
         )
-
+        
         # Создаем связь с продуктами (если нужно)
         payment_session.products.set(products)  # Если вы используете Many-to-Many связь
         payment_session.save()
