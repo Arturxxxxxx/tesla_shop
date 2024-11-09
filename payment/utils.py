@@ -3,6 +3,7 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 from .models import PaymentSession
 from decouple import config
+import uuid
 import logging
 
 
@@ -14,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 def generate_order_id():
     """Генерирует уникальный order_id для каждого платежа."""
-    return f"order_{get_random_string(12)}"
+    return str(uuid.uuid4())
+    # return f"order_{get_random_string(12)}"
 
 def check_payment_status(session_id):
     """
