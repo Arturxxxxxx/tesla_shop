@@ -10,7 +10,7 @@ User = get_user_model()
 class PaymentSession(models.Model):
     # Вместо Account из текущего приложения, используем модель Account из другого приложения
     account = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE, related_name="payment_sessions")  
-    product = models.ManyToManyField(Product)
+    products = models.ManyToManyField(Product, related_name='payment_sessions')
     session_id = models.CharField(max_length=100, unique=True)
     order_id = models.CharField(max_length=50, unique=True)  # Автоматический order_id
     valid_through = models.DateTimeField()
