@@ -32,3 +32,18 @@ class OrderHistory(models.Model):
 
     def __str__(self):
         return f"Order {self.order_id} for {self.user.username}"
+    
+
+
+
+
+class Payment(models.Model):
+    user = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    amount = models.PositiveIntegerField()  # Сумма в минорных единицах (например, тыйыны)
+    quid = models.CharField(max_length=255, unique=True)
+    txn_id = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # Другие поля по необходимости
