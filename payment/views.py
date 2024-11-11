@@ -142,3 +142,46 @@ class ConfirmPaymentView(APIView):
         payment.save()
         
         return Response({"message": confirm_data.get("comment")})
+    
+
+class CheckPaymentStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        quid = request.query_params.get("quid")
+        
+        # Проверка, что `quid` передан
+        if not quid:
+            return Response({"error": "Необходимо передать параметр 'quid'."}, status=400)
+
+        # Проверка статуса платежа через банк
+        response = requests.get(
+            f"https://ibank2.cbk.kg/otp/status?quid={quid}",
+            headers={
+                "authenticate": BANK_AUTH_HASH,
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            }
+        )
+        
+        status_data = response.json()
+        
+        # Обновление статуса платежа в базе данных, если найдено
+        try:
+            payment = Payment.objects.get(quid=quid)
+            if status_data["code"] == 330:
+                payment.status = "Успешен"
+            elif status_data["code"] == 332:
+                payment.status = "Неудача"
+            elif status_data["code"] == 331:
+                payment.status = "В процессе"
+            payment.save()
+        except Payment.DoesNotExist:
+            return Response({"error": "Платеж с таким quid не найден."}, status=404)
+        
+        # Возвращаем ответ со статусом
+        return Response({
+            "message": status_data.get("comment"),
+            "status": payment.status,
+            "txn_id": status_data.get("txnId")
+        })
