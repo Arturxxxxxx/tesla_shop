@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from cards.models import Product
 from account.models import CustomUser
 from .utils import create_payment_session, check_payment_status, handle_successful_payment
-from .models import PaymentSession, Payment
+from .models import PaymentSession
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response 
 from decouple import config
