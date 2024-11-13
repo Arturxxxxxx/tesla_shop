@@ -69,119 +69,119 @@ class FindSessionView(APIView):
             logger.error(f"Ошибка запроса к Payler API: {str(e)}")
             return JsonResponse({"error": "Ошибка запроса к Payler API"}, status=500)
 
-class StartPaymentView(APIView):
-    permission_classes = [IsAuthenticated]
+# class StartPaymentView(APIView):
+#     permission_classes = [IsAuthenticated]
     
-    def post(self, request):
-        user = request.user
-        product_id = request.data.get("product_id")
-        phone = request.data.get("phone")
-        amount = request.data.get("amount")  # Сумма в тыйынах
-        comment = f"Payment for product {product_id} by user {user.id}"
+#     def post(self, request):
+#         user = request.user
+#         product_id = request.data.get("product_id")
+#         phone = request.data.get("phone")
+#         amount = request.data.get("amount")  # Сумма в тыйынах
+#         comment = f"Payment for product {product_id} by user {user.id}"
         
-        # Поиск продукта и создание уникального идентификатора quid
-        product = Product.objects.get(id=product_id)
-        quid = f"CBK{user.id}{product_id}{Payment.objects.count()}"
+#         # Поиск продукта и создание уникального идентификатора quid
+#         product = Product.objects.get(id=product_id)
+#         quid = f"CBK{user.id}{product_id}{Payment.objects.count()}"
         
-        # Шаг 1: Проверка реквизитов
-        check_response = requests.get(
-            f"https://ibank2.cbk.kg/otp/check?phone={phone}",
-            headers={
-                "authenticate": BANK_AUTH_HASH,
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            }
-        )
-        if check_response.json().get("code") != 0:
-            return Response({"error": "Пользователь не найден в системе банка."}, status=400)
+#         # Шаг 1: Проверка реквизитов
+#         check_response = requests.get(
+#             f"https://ibank2.cbk.kg/otp/check?phone={phone}",
+#             headers={
+#                 "authenticate": BANK_AUTH_HASH,
+#                 "Accept": "application/json",
+#                 "Content-Type": "application/json"
+#             }
+#         )
+#         if check_response.json().get("code") != 0:
+#             return Response({"error": "Пользователь не найден в системе банка."}, status=400)
         
-        # Шаг 2: Создание платежа
-        create_response = requests.get(
-            f"https://ibank2.cbk.kg/otp/create?phone={phone}&amount={amount}&quid={quid}&comment={comment}",
-            headers={
-                "authenticate": BANK_AUTH_HASH,
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            }
-        )
-        create_data = create_response.json()
+#         # Шаг 2: Создание платежа
+#         create_response = requests.get(
+#             f"https://ibank2.cbk.kg/otp/create?phone={phone}&amount={amount}&quid={quid}&comment={comment}",
+#             headers={
+#                 "authenticate": BANK_AUTH_HASH,
+#                 "Accept": "application/json",
+#                 "Content-Type": "application/json"
+#             }
+#         )
+#         create_data = create_response.json()
         
-        if create_data.get("code") == 110:  # Успешно
-            Payment.objects.create(
-                user=user,
-                product=product,
-                amount=amount,
-                quid=quid,
-                txn_id=create_data["txnId"],
-                status="Создан"
-            )
-            return Response({"message": "Платеж успешно создан", "quid": quid})
-        return Response({"error": create_data.get("comment")}, status=400)
+#         if create_data.get("code") == 110:  # Успешно
+#             Payment.objects.create(
+#                 user=user,
+#                 product=product,
+#                 amount=amount,
+#                 quid=quid,
+#                 txn_id=create_data["txnId"],
+#                 status="Создан"
+#             )
+#             return Response({"message": "Платеж успешно создан", "quid": quid})
+#         return Response({"error": create_data.get("comment")}, status=400)
 
-class ConfirmPaymentView(APIView):
-    permission_classes = [IsAuthenticated]
+# class ConfirmPaymentView(APIView):
+#     permission_classes = [IsAuthenticated]
     
-    def post(self, request):
-        quid = request.data.get("quid")
-        otp = request.data.get("otp")
+#     def post(self, request):
+#         quid = request.data.get("quid")
+#         otp = request.data.get("otp")
         
-        # Подтверждение платежа
-        confirm_response = requests.get(
-            f"https://ibank2.cbk.kg/otp/confirm?quid={quid}&otp={otp}",
-            headers={
-                "authenticate": BANK_AUTH_HASH,
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            }
-        )
-        confirm_data = confirm_response.json()
+#         # Подтверждение платежа
+#         confirm_response = requests.get(
+#             f"https://ibank2.cbk.kg/otp/confirm?quid={quid}&otp={otp}",
+#             headers={
+#                 "authenticate": BANK_AUTH_HASH,
+#                 "Accept": "application/json",
+#                 "Content-Type": "application/json"
+#             }
+#         )
+#         confirm_data = confirm_response.json()
         
-        # Обновление статуса платежа на основании ответа
-        payment = Payment.objects.get(quid=quid)
-        payment.status = "Подтвержден" if confirm_data.get("code") == 220 else "Неудача"
-        payment.save()
+#         # Обновление статуса платежа на основании ответа
+#         payment = Payment.objects.get(quid=quid)
+#         payment.status = "Подтвержден" if confirm_data.get("code") == 220 else "Неудача"
+#         payment.save()
         
-        return Response({"message": confirm_data.get("comment")})
+#         return Response({"message": confirm_data.get("comment")})
     
 
-class CheckPaymentStatusView(APIView):
-    permission_classes = [IsAuthenticated]
+# class CheckPaymentStatusView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        quid = request.query_params.get("quid")
+#     def get(self, request):
+#         quid = request.query_params.get("quid")
         
-        # Проверка, что `quid` передан
-        if not quid:
-            return Response({"error": "Необходимо передать параметр 'quid'."}, status=400)
+#         # Проверка, что `quid` передан
+#         if not quid:
+#             return Response({"error": "Необходимо передать параметр 'quid'."}, status=400)
 
-        # Проверка статуса платежа через банк
-        response = requests.get(
-            f"https://ibank2.cbk.kg/otp/status?quid={quid}",
-            headers={
-                "authenticate": BANK_AUTH_HASH,
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            }
-        )
+#         # Проверка статуса платежа через банк
+#         response = requests.get(
+#             f"https://ibank2.cbk.kg/otp/status?quid={quid}",
+#             headers={
+#                 "authenticate": BANK_AUTH_HASH,
+#                 "Accept": "application/json",
+#                 "Content-Type": "application/json"
+#             }
+#         )
         
-        status_data = response.json()
+#         status_data = response.json()
         
-        # Обновление статуса платежа в базе данных, если найдено
-        try:
-            payment = Payment.objects.get(quid=quid)
-            if status_data["code"] == 330:
-                payment.status = "Успешен"
-            elif status_data["code"] == 332:
-                payment.status = "Неудача"
-            elif status_data["code"] == 331:
-                payment.status = "В процессе"
-            payment.save()
-        except Payment.DoesNotExist:
-            return Response({"error": "Платеж с таким quid не найден."}, status=404)
+#         # Обновление статуса платежа в базе данных, если найдено
+#         try:
+#             payment = Payment.objects.get(quid=quid)
+#             if status_data["code"] == 330:
+#                 payment.status = "Успешен"
+#             elif status_data["code"] == 332:
+#                 payment.status = "Неудача"
+#             elif status_data["code"] == 331:
+#                 payment.status = "В процессе"
+#             payment.save()
+#         except Payment.DoesNotExist:
+#             return Response({"error": "Платеж с таким quid не найден."}, status=404)
         
-        # Возвращаем ответ со статусом
-        return Response({
-            "message": status_data.get("comment"),
-            "status": payment.status,
-            "txn_id": status_data.get("txnId")
-        })
+#         # Возвращаем ответ со статусом
+#         return Response({
+#             "message": status_data.get("comment"),
+#             "status": payment.status,
+#             "txn_id": status_data.get("txnId")
+#         })
