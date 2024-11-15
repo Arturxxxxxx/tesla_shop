@@ -71,10 +71,10 @@ class FindSessionView(APIView):
             logger.error(f"Ошибка запроса к Payler API: {str(e)}")
             return JsonResponse({"error": "Ошибка запроса к Payler API"}, status=500)
 
-class LastOrderDetailView(generics.RetrieveAPIView):
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
+# class LastOrderDetailView(generics.RetrieveAPIView):
+#     serializer_class = OrderSerializer
+#     permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        # Возвращаем последний заказ клиента
-        return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
+#     def get_object(self):
+#         # Возвращаем последний заказ клиента
+#         return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
