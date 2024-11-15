@@ -23,28 +23,28 @@ class PaymentSession(models.Model):
         return f"PaymentSession {self.session_id} for {self.account.user.username}"
     
 
-class Order(models.Model):
-    STATUS_CHOICES = [
-        ('shipped', 'Отправлен')
-        ('delivered', 'Доставлен'),
-    ]
-    order_id = models.CharField(max_length=50, unique=True)
-    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
-    order_date = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=3, default='сом')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    client_phone = models.CharField(max_length=20, blank=True, null=True)
-    client_address = models.TextField(blank=True, null=True)
+# class Order(models.Model):
+#     STATUS_CHOICES = [
+#         ('shipped', 'Отправлен')
+#         ('delivered', 'Доставлен'),
+#     ]
+#     order_id = models.CharField(max_length=50, unique=True)
+#     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
+#     order_date = models.DateTimeField(auto_now_add=True)
+#     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+#     currency = models.CharField(max_length=3, default='сом')
+#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+#     client_phone = models.CharField(max_length=20, blank=True, null=True)
+#     client_address = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return f"Order {self.order_id} - {self.client.get_full_name()}"
+#     def __str__(self):
+#         return f"Order {self.order_id} - {self.client.get_full_name()}"
 
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # Цена товара на момент заказа
+# class OrderItem(models.Model):
+#     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+#     quantity = models.PositiveIntegerField()
+#     price = models.DecimalField(max_digits=10, decimal_places=2)  # Цена товара на момент заказа
 
-    def __str__(self):
-        return f"{self.product.name} x {self.quantity} in Order {self.order.order_id}"
+#     def __str__(self):
+#         return f"{self.product.name} x {self.quantity} in Order {self.order.order_id}"
