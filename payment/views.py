@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from cards.models import Product
 from account.models import CustomUser
-from .utils import create_payment_session, check_payment_status, handle_successful_payment
+from .utils import create_payment_session, check_payment_status
 from .models import PaymentSession, Order
 from .serializers import OrderSerializer, OrderItemSerializer
 from rest_framework.permissions import IsAuthenticated
