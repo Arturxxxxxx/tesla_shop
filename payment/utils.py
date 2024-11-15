@@ -99,24 +99,31 @@ def create_payment_session(account, products, total_amount):
         raise Exception("Failed to create payment session")
     
 
-from .models import OrderHistory
+# utils.py или views.py, в зависимости от места вызова
+from .models import Order, OrderItem
 
-def handle_successful_payment(payment_session, products):
-    # Создание записи в истории заказов
-    order_history = OrderHistory.objects.create(
-        user=payment_session.account,
-        order_id=payment_session.order_id,
-        amount=payment_session.amount,
-        status="completed",
-        order_date=timezone.now()
+def create_order_after_payment(client, products, total_amount, currency='сом'):
+    # Генерируем уникальный order_id
+    order_id = str(uuid.uuid4()).replace("-", "").upper()[:12]
+
+    # Создаём заказ
+    order = Order.objects.create(
+        order_id=order_id,
+        client=client,
+        total_amount=total_amount,
+        currency=currency,
+        status='paid',  # Устанавливаем статус "оплачен"
+        client_phone=client.phone_number,
+        client_address=client.address,
     )
-    
-    # Привязка купленных продуктов к заказу
-    order_history.products.set(products)
-    order_history.save()
 
-    # Обновление статуса платежной сессии
-    payment_session.status = 'completed'
-    payment_session.save()
+    # Добавляем товары в заказ
+    for product_data in products:
+        OrderItem.objects.create(
+            order=order,
+            product=product_data['product'],
+            quantity=product_data['quantity'],
+            price=product_data['product'].price,
+        )
 
-    return order_history
+    return order
