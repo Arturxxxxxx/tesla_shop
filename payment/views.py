@@ -15,7 +15,7 @@ import logging
 
 PAYLER_HOST = config('PAYLER_HOST')
 PAYLER_KEY = config('PAYLER_KEY')
-BANK_AUTH_HASH = config('BANK_AUTH_HASH')
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class StartPaymentSessionView(APIView):
 
         try:
             payment_session = create_payment_session(account, products, total_amount)
-            
+
             pay_url = f"https://{PAYLER_HOST}/gapi/Pay?session_id="
             return JsonResponse({"pay_url": pay_url,
                                  "payment_session": payment_session.session_id})
