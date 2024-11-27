@@ -33,9 +33,13 @@ class StartPaymentSessionView(APIView):
 
         try:
             payment_session = create_payment_session(account, products, total_amount)
-
-            pay_url = f"https://{PAYLER_HOST}/gapi/Pay?session_id={payment_session.session_id}"
-            return JsonResponse({"pay_url": pay_url})
+            
+            pay_url = f"https://{PAYLER_HOST}/gapi/Pay?session_id="
+            return JsonResponse({"pay_url": pay_url,
+                                 "payment_session": payment_session.session_id})
+            # pay_url = f"https://{PAYLER_HOST}/gapi/Pay?session_id={payment_session.session_id}"
+            # return JsonResponse({"pay_url": pay_url,
+            #                      "payment_session": payment_session.session_id})
 
         except Exception as e:
             print(e)
