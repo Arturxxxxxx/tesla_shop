@@ -81,3 +81,11 @@ class LastOrderDetailView(generics.RetrieveAPIView):
     def get_object(self):
         # Возвращаем последний заказ клиента
         return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
+
+class OrderCreateView(generics.CreateAPIView):
+    serializer_class = OrderCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Автоматически добавляем текущего клиента в заказ
+        serializer.save(client=self.request.user)

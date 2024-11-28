@@ -56,3 +56,33 @@ class OrderSerializer(serializers.ModelSerializer):
             'client_address',
             'items'
         ]
+
+class OrderItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity', 'price']  # Указываем только необходимые для создания поля
+
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    items = OrderItemCreateSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'client',
+            'total_amount',
+            'currency',
+            'client_phone',
+            'client_address',
+            'items'
+        ]
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')  # Убираем данные по товарам
+        order = Order.objects.create(**validated_data)  # Создаем заказ
+
+        # Создаем элементы заказа (товары)
+        for item_data in items_data:
+            OrderItem.objects.create(order=order, **item_data)
+
+        return order

@@ -64,7 +64,7 @@ def create_payment_session(account, products, total_amount):
     data = {
         "key": PAYLER_API_KEY,
         "type": "OneStep",
-        "order_id": "1212121211212",
+        "order_id": order_id,
         "amount": int(total_amount * 100),  # Payler требует сумму в минимальных единицах (копейках)
         "currency": "KGS",
         "product": product_names,  # Передаем все продукты в виде строки
