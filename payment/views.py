@@ -42,8 +42,8 @@ class StartPaymentSessionView(APIView):
             #                      "payment_session": payment_session.session_id})
 
         except Exception as e:
-            print(e)
-            # return JsonResponse({"error": str(e)}, status=400)
+            # print(e)
+            return JsonResponse({"error": str(e)}, status=400)
 
 
 class PaymentStatusView(APIView):
