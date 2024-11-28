@@ -20,7 +20,7 @@ class PaymentSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"PaymentSession {self.session_id} for {self.account.user.first_name}"
+        return f"PaymentSession {self.session_id} for {self.account.first_name}"
     
 
 class Order(models.Model):
