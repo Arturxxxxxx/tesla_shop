@@ -35,6 +35,7 @@ def check_payment_status(session_id):
     logger.info(f"Ответ от Payler для проверки статуса: {response_data}")
 
     if response_data.get("status") == "Charged":
+        print(response_data.get("status"))
         payment_session = PaymentSession.objects.get(session_id=session_id)
         payment_session.status = "completed"
         payment_session.save()
