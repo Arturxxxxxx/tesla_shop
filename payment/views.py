@@ -49,7 +49,7 @@ class StartPaymentSessionView(APIView):
 class PaymentStatusView(APIView):
     def get(self, session_id, order_id):
         status = check_payment_status(session_id, order_id)
-        return JsonResponse({"text": status})
+        return JsonResponse({"status": status})
 
 
 class FindSessionView(APIView):
