@@ -18,14 +18,15 @@ def generate_order_id():
     return str(uuid.uuid4())
     # return f"order_{get_random_string(12)}"
 
-def check_payment_status(session_id):
+def check_payment_status(session_id, order_id):
     """
     Проверяет статус платежа по session_id.
     """
     url = f"https://{PAYLER_HOST}/gapi/GetStatus"
     data = {
         "key": PAYLER_API_KEY,
-        "session_id": session_id
+        "session_id": session_id,
+        "order_id": order_id
     }
     response = requests.post(url, data=data)
     print(response)
