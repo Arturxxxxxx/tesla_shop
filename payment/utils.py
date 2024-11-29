@@ -45,7 +45,7 @@ def check_payment_status(session_id):
         payment_session.save()
         return "failed"
     else:
-        return "pending"
+        return "pendingg"
 
 
 
