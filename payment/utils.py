@@ -68,7 +68,7 @@ def create_payment_session(account, products, total_amount):
         "amount": int(total_amount * 100),  # Payler требует сумму в минимальных единицах (копейках)
         "currency": "KGS",
         "product": product_names,  # Передаем все продукты в виде строки
-        "return_url_success": "https://koreacenter.kg/success",
+        "return_url_success": "https://koreacenter.kg/profile",
         "return_url_decline": "https://koreacenter.kg/decline",
     }
 
