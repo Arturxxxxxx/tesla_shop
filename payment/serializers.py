@@ -12,9 +12,12 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
-    client_name = serializers.CharField(source='client.get_full_name')
+    client_name = serializers.SerializerMethodField()
     client_phone = serializers.CharField(source='client.phone_number')
-
+    
+    def get_client_name(self, obj):
+        """Объединяет имя и фамилию клиента."""
+        return f"{obj.client.first_name} {obj.client.last_name}".strip()
     class Meta:
         model = Order
         fields = [
