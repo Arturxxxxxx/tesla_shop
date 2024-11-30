@@ -81,8 +81,11 @@ class LastOrderDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        # Возвращаем последний заказ клиента
-        return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
+        user = self.requests.user
+        if user.role == 'admin':
+            return Order.objects.all()
+        else:# Возвращаем последний заказ клиента
+            return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
 
 class OrderCreateView(generics.CreateAPIView):
     serializer_class = OrderCreateSerializer
