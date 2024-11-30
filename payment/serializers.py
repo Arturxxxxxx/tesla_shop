@@ -3,12 +3,6 @@ from .models import PaymentSession, Order, OrderItem, Order
 from cards.models import Product 
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['name', 'price']  # Поля продукта
-
-
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name')
     

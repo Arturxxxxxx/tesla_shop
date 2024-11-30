@@ -7,7 +7,7 @@ from cards.models import Product
 from account.models import CustomUser
 from .utils import create_payment_session, check_payment_status
 from .models import PaymentSession, Order
-from .serializers import OrderSerializer, OrderItemSerializer
+from .serializers import OrderSerializer, OrderItemSerializer, OrderCreateSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response 
 from decouple import config
@@ -88,7 +88,7 @@ class LastOrderDetailView(generics.RetrieveAPIView):
             return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
 
 class OrderCreateView(generics.CreateAPIView):
-    serializer_class = OrderSerializer
+    serializer_class = OrderCreateSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
