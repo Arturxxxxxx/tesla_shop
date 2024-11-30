@@ -131,7 +131,7 @@ class LastOrderDetailView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_object(self):
+    def get_queryset(self):
         user = self.request.user
         order = Order.objects.filter(client=user)
         
