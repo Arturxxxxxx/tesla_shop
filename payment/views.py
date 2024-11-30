@@ -105,7 +105,7 @@ class AdminOrderListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'admin':  # Убедитесь, что роль 'admin' указана правильно
-            return Order.objects.all().order_by('-order_date')
+            return Order.objects.all()
         return Order.objects.none()  # Если не админ, то запрет доступа
 
 

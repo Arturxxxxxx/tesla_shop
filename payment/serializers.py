@@ -14,7 +14,6 @@ class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
     client_name = serializers.CharField(source='client.get_full_name')
     client_phone = serializers.CharField(source='client.phone_number')
-    client_address = serializers.CharField(source='client.address')
 
     class Meta:
         model = Order
