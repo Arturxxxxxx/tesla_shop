@@ -35,7 +35,6 @@ class Order(models.Model):
     currency = models.CharField(max_length=3, default='сом')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     client_phone = models.CharField(max_length=20, blank=True, null=True)
-    client_address = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Order {self.order_id} - {self.client.get_full_name()}"
@@ -44,7 +43,8 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    price_product = models.DecimalField(max_digits=10, decimal_places=3)
     price = models.DecimalField(max_digits=10, decimal_places=2)  # Цена товара на момент заказа
 
     def __str__(self):
-        return f"{self.product.name} x {self.quantity} in Order {self.order.order_id}"
+        return f"{self.product.title} x {self.quantity} in Order {self.order.order_id}"
