@@ -1,5 +1,5 @@
 import requests
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.generics import UpdateAPIView, DestroyAPIView
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -163,23 +163,40 @@ class OrderPatchView(UpdateAPIView):
         # Вызываем обновление данных через стандартный механизм DRF
         return super().patch(request, *args, **kwargs)
     
-class OrderDeleteView(generics.DestroyAPIView):
-    """
-    Эндпоинт для удаления заказа клиента.
-    """
-    permission_classes = [IsAuthenticated]
-    serializer_class = OrderSerializer
+# class OrderDeleteView(generics.DestroyAPIView):
+#     """
+#     Эндпоинт для удаления заказа клиента.
+#     """
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = OrderSerializer
 
-    def get_queryset(self):
-        # Вернем заказы только для текущего пользователя
-        return Order.objects.filter(client=self.request.user)
+#     def get_queryset(self):
+#         # Вернем заказы только для текущего пользователя
+#         return Order.objects.filter(client=self.request.user)
     
-    def get_object(self):
-        # Получаем объект заказа, который должен быть удален
-        order = super().get_object()
+#     def get_object(self):
+#         # Получаем объект заказа, который должен быть удален
+#         order = super().get_object()
 
-        # Если заказ не принадлежит текущему пользователю, возвращаем ошибку
-        if order.client != self.request.user:
-            raise PermissionDenied("Вы не можете удалить этот заказ.")
+#         # Если заказ не принадлежит текущему пользователю, возвращаем ошибку
+#         if order.client != self.request.user:
+#             raise PermissionDenied("Вы не можете удалить этот заказ.")
 
-        return order
+#         return order
+class OrderDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        # Получаем ID заказа из URL
+        order_id = self.kwargs.get('order_id')
+        try:
+            # Ищем заказ по ID и проверяем, что он принадлежит текущему пользователю
+            order = Order.objects.get(id=order_id, client=request.user)
+
+            # Удаляем заказ
+            order.delete()
+
+            return Response({"message": "Order successfully deleted."}, status=status.HTTP_204_NO_CONTENT)
+
+        except Order.DoesNotExist:
+            raise PermissionDenied("You do not have permission to delete this order.")
