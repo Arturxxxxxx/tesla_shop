@@ -9,10 +9,10 @@ from .serializers import BasketSerializer
 class DeleteBasketItemView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, product_id):
+    def delete(self, request):
         try:
             basket = request.user.basket
-            item = basket.items.get(product_id=product_id)
+            item = basket.items.all()
             item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except BasketItem.DoesNotExist:
