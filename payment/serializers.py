@@ -61,7 +61,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['order_id' 'total_amount', 'currency', 'items']
+        fields = ['order_id', 'total_amount', 'currency', 'items']
 
     def validate_order_id(self, value):
         # Проверяем, что order_id уникален
