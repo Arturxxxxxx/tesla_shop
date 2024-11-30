@@ -117,7 +117,6 @@ def create_order_after_payment(client, products, total_amount, currency='сом'
         currency=currency,
         status='paid',  # Устанавливаем статус "оплачен"
         client_phone=client.phone_number,
-        client_address=client.address,
     )
 
     # Добавляем товары в заказ
