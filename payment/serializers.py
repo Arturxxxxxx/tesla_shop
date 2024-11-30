@@ -67,7 +67,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items')
         user = self.context['request'].user
         phone_number = user.phone_number  # Берем телефон из базы данных
-
+        validated_data.pop('client', None)
         # Создаем заказ
         order = Order.objects.create(client=user, client_phone=phone_number, **validated_data)
 
