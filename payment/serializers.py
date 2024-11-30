@@ -61,7 +61,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['total_amount', 'currency', 'items']
+        fields = ['order_id' 'total_amount', 'currency', 'items']
+
+    def validate_order_id(self, value):
+        # Проверяем, что order_id уникален
+        if Order.objects.filter(order_id=value).exists():
+            raise serializers.ValidationError("Order ID must be unique.")
+        return value
+
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
