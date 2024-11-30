@@ -9,10 +9,10 @@ from .serializers import BasketSerializer
 class DeleteBasketItemView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request):
+    def delete(self, request, product_id):
         try:
             basket = request.user.basket
-            item = basket.items.all()
+            item = basket.items.get(product_id=product_id)
             item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except BasketItem.DoesNotExist:
@@ -59,3 +59,17 @@ class BasketView(APIView):
 
         serializer = BasketSerializer(basket, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class DeleteBasketView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        try:
+            basket = request.user.basket
+            item = basket.items.all()
+            item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except BasketItem.DoesNotExist:
+            return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+        except BasketModel.DoesNotExist:
+            return Response({"error": "Basket not found"}, status=status.HTTP_404_NOT_FOUND)
