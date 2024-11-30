@@ -133,7 +133,7 @@ class LastOrderDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         user = self.request.user
-        order = Order.objects.filter(client=user).order_by('-order_date').first()
+        order = Order.objects.filter(client=user).all()
         
         if not order:
             raise NotFound("Последний заказ не найден.")
