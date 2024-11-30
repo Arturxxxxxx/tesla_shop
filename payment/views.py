@@ -109,6 +109,21 @@ class AdminOrderListView(generics.ListAPIView):
         return Order.objects.none()  # Если не админ, то запрет доступа
 
 
+# class LastOrderDetailView(generics.RetrieveAPIView):
+#     """
+#     Эндпоинт для клиента — получить последний заказ.
+#     """
+#     serializer_class = OrderSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_object(self):
+#         user = self.request.user
+#         order = Order.objects.filter(client=user).order_by('-order_date').first()
+        
+#         if not order:
+            
+from rest_framework.exceptions import NotFound
+
 class LastOrderDetailView(generics.RetrieveAPIView):
     """
     Эндпоинт для клиента — получить последний заказ.
@@ -118,4 +133,10 @@ class LastOrderDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         user = self.request.user
-        return Order.objects.filter(client=user).order_by('-order_date').first()
+        order = Order.objects.filter(client=user).order_by('-order_date').first()
+        
+        if not order:
+            raise NotFound("Последний заказ не найден.")
+        
+        return order
+
