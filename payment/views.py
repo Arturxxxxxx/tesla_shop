@@ -1,5 +1,6 @@
 import requests
 from rest_framework import generics
+from rest_framework.generics import UpdateAPIView, DestroyAPIView
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -122,7 +123,7 @@ class AdminOrderListView(generics.ListAPIView):
         
 #         if not order:
             
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 class LastOrderDetailView(generics.ListAPIView):
     """
@@ -140,3 +141,45 @@ class LastOrderDetailView(generics.ListAPIView):
         
         return order
 
+class OrderPatchView(UpdateAPIView):
+    """
+    Эндпоинт для частичного обновления заказа клиента.
+    """
+    permission_classes = [IsAuthenticated]
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    def get_object(self):
+        # Получаем заказ по id из URL
+        order = super().get_object()
+
+        # Проверяем, принадлежит ли заказ текущему пользователю
+        if order.client != self.request.user:
+            raise PermissionDenied("Вы не можете изменять этот заказ.")
+
+        return order
+
+    def patch(self, request, *args, **kwargs):
+        # Вызываем обновление данных через стандартный механизм DRF
+        return super().patch(request, *args, **kwargs)
+    
+class OrderDeleteView(DestroyAPIView):
+    """
+    Эндпоинт для удаления заказа клиента.
+    """
+    permission_classes = [IsAuthenticated]
+    queryset = Order.objects.all()
+
+    def get_object(self):
+        # Получаем заказ по id из URL
+        order = super().get_object()
+
+        # Проверяем, принадлежит ли заказ текущему пользователю
+        if order.client != self.request.user:
+            raise PermissionDenied("Вы не можете удалить этот заказ.")
+
+        return order
+
+    def delete(self, request, *args, **kwargs):
+        # Удаление заказа
+        return super().delete(request, *args, **kwargs)
