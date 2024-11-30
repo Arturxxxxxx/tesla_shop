@@ -7,8 +7,8 @@ from rest_framework.views import APIView
 from cards.models import Product
 from account.models import CustomUser
 from .utils import create_payment_session, check_payment_status
-from .models import PaymentSession, Order
-from .serializers import OrderSerializer, OrderItemSerializer, OrderCreateSerializer
+from .models import  Order
+from .serializers import OrderSerializer, OrderCreateSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response 
 from decouple import config
@@ -168,14 +168,17 @@ class OrderDeleteView(DestroyAPIView):
     Эндпоинт для удаления заказа клиента.
     """
     permission_classes = [IsAuthenticated]
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
+    def get_queryset(self):
+        # Вернем заказы только для текущего пользователя
+        return Order.objects.filter(client=self.request.user)
+    
     def get_object(self):
-        # Получаем заказ по id из URL
+        # Получаем объект заказа, который должен быть удален
         order = super().get_object()
 
-        # Проверяем, принадлежит ли заказ текущему пользователю
+        # Если заказ не принадлежит текущему пользователю, возвращаем ошибку
         if order.client != self.request.user:
             raise PermissionDenied("Вы не можете удалить этот заказ.")
 
