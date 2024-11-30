@@ -151,7 +151,7 @@ class OrderPatchView(UpdateAPIView):
 
     def get_queryset(self):
         # Получаем заказ по id из URL
-        order = super().get_object()
+        order = super().get_queryset()
 
         # Проверяем, принадлежит ли заказ текущему пользователю
         if order.client != self.request.user:
@@ -172,7 +172,7 @@ class OrderDeleteView(DestroyAPIView):
 
     def get_queryset(self):
         # Получаем заказ по id из URL
-        order = super().get_object()
+        order = super().get_queryset()
 
         # Проверяем, принадлежит ли заказ текущему пользователю
         if order.client != self.request.user:
