@@ -149,7 +149,7 @@ class OrderPatchView(UpdateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
-    def get_object(self):
+    def get_queryset(self):
         # Получаем заказ по id из URL
         order = super().get_object()
 
@@ -170,7 +170,7 @@ class OrderDeleteView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
 
-    def get_object(self):
+    def get_queryset(self):
         # Получаем заказ по id из URL
         order = super().get_object()
 
