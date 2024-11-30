@@ -124,7 +124,7 @@ class AdminOrderListView(generics.ListAPIView):
             
 from rest_framework.exceptions import NotFound
 
-class LastOrderDetailView(generics.RetrieveAPIView):
+class LastOrderDetailView(generics.ListAPIView):
     """
     Эндпоинт для клиента — получить последний заказ.
     """
