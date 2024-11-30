@@ -169,17 +169,14 @@ class OrderDeleteView(DestroyAPIView):
     """
     permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
+    serializer_class = OrderSerializer
 
-    def get_queryset(self):
+    def get_object(self):
         # Получаем заказ по id из URL
-        order = super().get_queryset()
+        order = super().get_object()
 
         # Проверяем, принадлежит ли заказ текущему пользователю
         if order.client != self.request.user:
             raise PermissionDenied("Вы не можете удалить этот заказ.")
 
         return order
-
-    def delete(self, request, *args, **kwargs):
-        # Удаление заказа
-        return super().delete(request, *args, **kwargs)
