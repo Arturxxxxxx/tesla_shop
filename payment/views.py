@@ -145,6 +145,7 @@ class OrderPatchView(UpdateAPIView):
     """
     Эндпоинт для частичного обновления заказа клиента.
     """
+    permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
@@ -153,7 +154,7 @@ class OrderPatchView(UpdateAPIView):
         order = super().get_object()
 
         # Проверяем, принадлежит ли заказ текущему пользователю
-        if order.client != self.request.user:
+        if not self.request.user.role == "admin":
             raise PermissionDenied("Вы не можете изменять этот заказ.")
 
         return order
@@ -166,6 +167,7 @@ class OrderDeleteView(generics.DestroyAPIView):
     """
     Эндпоинт для удаления заказа клиента.
     """
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
 
     def get_queryset(self):
@@ -177,7 +179,7 @@ class OrderDeleteView(generics.DestroyAPIView):
         order = super().get_object()
 
         # Если заказ не принадлежит текущему пользователю, возвращаем ошибку
-        if order.client != self.request.user:
+        if not self.request.user.role == "admin":
             raise PermissionDenied("Вы не можете удалить этот заказ.")
 
         return order
