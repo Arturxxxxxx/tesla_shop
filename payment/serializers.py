@@ -34,7 +34,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderItemCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ['product', 'quantity', 'price', 'price_product']  # Указываем только необходимые для создания поля
+        fields = ['product', 'quantity', 'price']  # Указываем только необходимые для создания поля
 
 # class OrderCreateSerializer(serializers.ModelSerializer):
 #     items = OrderItemCreateSerializer(many=True)
