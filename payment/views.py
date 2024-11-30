@@ -163,7 +163,7 @@ class OrderPatchView(UpdateAPIView):
         # Вызываем обновление данных через стандартный механизм DRF
         return super().patch(request, *args, **kwargs)
     
-class OrderDeleteView(DestroyAPIView):
+class OrderDeleteView(generics.DestroyAPIView):
     """
     Эндпоинт для удаления заказа клиента.
     """
