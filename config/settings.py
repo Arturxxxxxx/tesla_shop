@@ -26,7 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['104.197.92.255', 'koreacenter.kg']
+ALLOWED_HOSTS = ['koreacenter.kg']
 
 
 
