@@ -76,16 +76,16 @@ class FindSessionView(APIView):
             logger.error(f"Ошибка запроса к Payler API: {str(e)}")
             return JsonResponse({"error": "Ошибка запроса к Payler API"}, status=500)
 
-class LastOrderDetailView(generics.RetrieveAPIView):
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
+# class LastOrderDetailView(generics.RetrieveAPIView):
+#     serializer_class = OrderSerializer
+#     permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        user = self.requests.user
-        if user.role == 'admin':
-            return Order.objects.all()
-        else:# Возвращаем последний заказ клиента
-            return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
+#     def get_object(self):
+#         user = self.request.user
+#         if user.role == 'admin':
+#             return Order.objects.all()
+#         else:# Возвращаем последний заказ клиента
+#             return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
 
 class OrderCreateView(generics.CreateAPIView):
     serializer_class = OrderCreateSerializer
@@ -94,3 +94,28 @@ class OrderCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         # Автоматически добавляем текущего клиента в заказ
         serializer.save(client=self.request.user)
+
+class AdminOrderListView(generics.ListAPIView):
+    """
+    Эндпоинт для администратора — получить все заказы.
+    """
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'admin':  # Убедитесь, что роль 'admin' указана правильно
+            return Order.objects.all().order_by('-order_date')
+        return Order.objects.none()  # Если не админ, то запрет доступа
+
+
+class LastOrderDetailView(generics.RetrieveAPIView):
+    """
+    Эндпоинт для клиента — получить последний заказ.
+    """
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        return Order.objects.filter(client=user).order_by('-order_date').first()
