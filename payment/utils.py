@@ -34,7 +34,7 @@ def check_payment_status(session_id, order_id):
     
     # Логирование ответа
     # logger.info(f"Ответ от Payler для проверки статуса: {response_data}")
-    print(response_data)
+    print(response)
     if response_data.get("status") == "Charged":
         print(response_data)
         payment_session = PaymentSession.objects.get(session_id=session_id)
