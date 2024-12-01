@@ -25,8 +25,8 @@ class PaymentSession(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('Отправлен'),
-        ('Доставлен')
+        ('Отправлен', 'Отправлен'),
+        ('Доставлен', 'Доставлен')
     ]
     order_id = models.CharField(max_length=100, unique=True)
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
