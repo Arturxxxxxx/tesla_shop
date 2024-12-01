@@ -12,7 +12,7 @@ class PaymentSession(models.Model):
     account = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE, related_name="payment_sessions")  
     products = models.ManyToManyField(Product, related_name='payment_sessions')
     session_id = models.CharField(max_length=100, unique=True)
-    order_id = models.CharField(max_length=50, unique=True)  # Автоматический order_id
+    order_id = models.CharField(max_length=100, unique=True)  # Автоматический order_id
     valid_through = models.DateTimeField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3)
@@ -28,7 +28,7 @@ class Order(models.Model):
         ('Отправлен'),
         ('Доставлен')
     ]
-    order_id = models.CharField(max_length=50, unique=True)
+    order_id = models.CharField(max_length=100, unique=True)
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     order_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
