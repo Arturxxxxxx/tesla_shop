@@ -29,7 +29,7 @@ def check_payment_status(session_id, order_id):
         "order_id": order_id
     }
     response = requests.post(url, data=data)
-    # print(response)
+    print(response)
     response_data = response.json()
     
     # Логирование ответа

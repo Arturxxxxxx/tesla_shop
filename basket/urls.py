@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import BasketView,DeleteBasketItemView, DeleteBasketView
+from .views import BasketView, DeleteBasketItemView, DeleteBasketView
 
 urlpatterns = [
     path('basket/', BasketView.as_view(), name='basket'),  # URL to view the basket
