@@ -43,14 +43,13 @@ class StartPaymentSessionView(APIView):
             #                      "payment_session": payment_session.session_id})
 
         except Exception as e:
-            print(e)
             return JsonResponse({"error": str(e)})
 
 
 class PaymentStatusView(APIView):
     def get(self, request, session_id, order_id):
         status = check_payment_status(session_id, order_id)
-        print(status)
+        # print(status)
         return JsonResponse({"status": status})
 
 
