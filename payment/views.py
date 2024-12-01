@@ -136,6 +136,7 @@ class LastOrderDetailView(generics.ListAPIView):
         order = Order.objects.filter(client=user)
         
         if not order:
+            print(order)
             raise NotFound("Последний заказ не найден.")
         
         return order
