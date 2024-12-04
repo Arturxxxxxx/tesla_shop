@@ -72,7 +72,7 @@ def create_payment_session(account, products, total_amount):
         "currency": "KGS",
         "product": product_names,  # Передаем все продукты в виде строки
         "return_url_success": "https://koreacenter.kg/profile",
-        "return_url_decline": "https://koreacenter.kg/decline",
+        "return_url_decline": "https://koreacenter.kg/profile",
     }
 
     response = requests.post(url, data=data)
