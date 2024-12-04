@@ -167,19 +167,24 @@ class OrderDeleteView(generics.DestroyAPIView):
     """
     Эндпоинт для удаления заказа клиента.
     """
-
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        # Вернем заказы только для текущего пользователя
+        # Если пользователь — администратор, возвращаем все заказы
+        if self.request.user.role == "admin":
+            return Order.objects.all()
+
+        # Если пользователь обычный, возвращаем только его заказы
         return Order.objects.filter(client=self.request.user)
-    
+
     def get_object(self):
-        # Получаем объект заказа, который должен быть удален
+        # Получаем объект через стандартный метод
         order = super().get_object()
 
-        # Если заказ не принадлежит текущему пользователю, возвращаем ошибку
-        if not self.request.user.role == "admin":
+        # Проверка прав: администратор может удалить любой заказ
+        # Обычный пользователь может удалять только свои заказы
+        if self.request.user.role != "admin" and order.client != self.request.user:
             raise PermissionDenied("Вы не можете удалить этот заказ.")
 
         return order
