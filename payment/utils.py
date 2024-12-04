@@ -41,7 +41,7 @@ def check_payment_status(session_id, order_id):
         payment_session.status = "completed"
         payment_session.save()
         return "completed"
-    elif response_data.get("status") == "Declined":
+    elif response_data.get("status") == "Rejected":
         payment_session = PaymentSession.objects.get(session_id=session_id)
         payment_session.status = "failed"
         payment_session.save()
