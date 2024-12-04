@@ -167,7 +167,7 @@ class OrderDeleteView(generics.DestroyAPIView):
     """
     Эндпоинт для удаления заказа клиента.
     """
-    permission_classes = [IsAuthenticated]
+
     serializer_class = OrderSerializer
 
     def get_queryset(self):
