@@ -4,8 +4,8 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 
 # Токен и URL API
 TOKEN = '7306256466:AAExI2px66yo-WbMwI_XvxCGd7lCufaDa7Y'
-API_URL = 'http://104.197.92.255/products/product/'
-CATEGORY_API_URL = 'http://104.197.92.255/products/categories/'
+API_URL = 'https://koreacenter.kg/api/products/product/'
+CATEGORY_API_URL = 'https://koreacenter.kg/api/products/categories/'
 
 AUTHORIZED_USERS = [5469335222, 5469335222]
 
