@@ -10,7 +10,7 @@ class Category(models.Model):
     def __str__(self):
         return self.category
 
-class marka(models.Model):
+class Marka(models.Model):
     image = models.ImageField(upload_to='marka/', blank=True, null=True)
     marka = models.CharField(max_length=50, unique=True, verbose_name="марка")
 
