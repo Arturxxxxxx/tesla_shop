@@ -10,6 +10,12 @@ class Category(models.Model):
     def __str__(self):
         return self.category
 
+class marka(models.Model):
+    image = models.ImageField(upload_to='marka/', blank=True, null=True)
+    marka = models.CharField(max_length=50, unique=True, verbose_name="марка")
+
+    def __str__(self):
+        return self.marka
 
 class Product(models.Model):
     CHOICE_NEW = 'Новый'
@@ -30,7 +36,7 @@ class Product(models.Model):
     artikul = models.CharField(max_length=30, blank=True, null=True)
     year = models.PositiveIntegerField()
     in_stock = models.BooleanField(default=True)
-    model = models.CharField(max_length=50)
+    model = models.CharField(max_length=50, blank=True, null=True)
     spare_part_number = models.CharField(max_length=50)
     generation = models.CharField(max_length=50)
     choice = models.CharField(
@@ -40,7 +46,7 @@ class Product(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    marka = models.CharField(max_length=50, verbose_name='марка')  
+    marka = models.CharField(max_length=50, verbose_name='марка', blank=True, null=True)  
 
     def __str__(self):
         return self.title
