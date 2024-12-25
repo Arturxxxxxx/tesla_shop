@@ -34,7 +34,7 @@ class Product(models.Model):
     price = models.PositiveIntegerField()
     description = models.TextField(validators=[MaxLengthValidator(300)])
     artikul = models.CharField(max_length=30, blank=True, null=True)
-    year = models.PositiveIntegerField()
+    year = models.PositiveIntegerField(blank=True, null=True)
     in_stock = models.BooleanField(default=True)
     model = models.CharField(max_length=50, blank=True, null=True)
     spare_part_number = models.CharField(max_length=50)
