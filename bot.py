@@ -1,223 +1,359 @@
+import telebot
+from telebot import types
 import requests
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
+import os
+# from io import BytesIO
 
-# Токен и URL API
-TOKEN = '7306256466:AAExI2px66yo-WbMwI_XvxCGd7lCufaDa7Y'
+
+TOKEN = '7928953840:AAGnh5kDj_DSF04NyPsPJvL5z2dQti6_fJQ'
 API_URL = 'https://koreacenter.kg/api/products/product/'
 CATEGORY_API_URL = 'https://koreacenter.kg/api/products/categories/'
+MARKA_API_URL = 'https://koreacenter.kg/api/products/Marka/'
 
-AUTHORIZED_USERS = [5469335222, 5469335222]
+bot = telebot.TeleBot(TOKEN)
 
-# Определение состояний
-START, TITLE, PRICE, DESCRIPTION, ARTIKUL, YEAR, IN_STOCK, MARKA, MODEL, SPARE_PART_NUMBER, GENERATION, CATEGORY, PRODUCT_IMAGES, CATEGORY_NAME, CATEGORY_IMAGES, CONDITION = range(16)
+user_data = {}
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    user_id = update.message.from_user.id
-    user = update.message.from_user
-    if user_id not in AUTHORIZED_USERS:
-        await update.message.reply_text('У вас нет доступа к этому боту.')
-        return ConversationHandler.END
+START, TITLE, PRICE, DESCRIPTION, ARTIKUL, YEAR, IN_STOCK, CONDITION, MARKA, MODEL, SPARE_PART_NUMBER, GENERATION, CATEGORY, PRODUCT_IMAGES, CATEGORY_NAME = range(15)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton('Создать продукт')
+    btn2 = types.KeyboardButton('Добавить категорию')
+    btn3 = types.KeyboardButton('Создание марки')
+    markup.add(btn1, btn2, btn3)
+    bot.send_message(message.chat.id, 'Выберите действие:', reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.text == 'Создать продукт')
+def handle_create_product(message):
+    user_data[message.from_user.id] = {}
+    bot.send_message(message.chat.id, 'Привет! Давайте начнем создание нового продукта. Назовите продукт.')
+    bot.register_next_step_handler(message, receive_title)
+
+def receive_title(message):
+    user_data[message.from_user.id]['title'] = message.text
+    bot.send_message(message.chat.id, 'Введите цену продукта:')
+    bot.register_next_step_handler(message, receive_price)
+
+def receive_price(message):
+    user_data[message.from_user.id]['price'] = message.text
+    bot.send_message(message.chat.id, 'Введите описание продукта:')
+    bot.register_next_step_handler(message, receive_description)
+
+def receive_description(message):
+    user_data[message.from_user.id]['description'] = message.text
+    bot.send_message(message.chat.id, 'Введите артикул продукта:')
+    bot.register_next_step_handler(message, receive_artikul)
+
+# def receive_artikul(message):
+#     user_data[message.from_user.id]['artikul'] = message.text
+#     bot.send_message(message.chat.id, 'Введите год выпуска:')
+#     bot.register_next_step_handler(message, receive_year)
+
+def receive_artikul(message):
+    user_data[message.from_user.id]['artikul'] = message.text
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+    btn1 = types.KeyboardButton('В наличии')
+    btn2 = types.KeyboardButton('Нет в наличии')
+    markup.add(btn1, btn2)
+    bot.send_message(message.chat.id, 'Продукт в наличии?', reply_markup=markup)
+    bot.register_next_step_handler(message, handle_in_stock)
+
+def handle_in_stock(message):
+    if message.text == 'В наличии':
+        user_data[message.from_user.id]['in_stock'] = 'yes'
+    else:
+        user_data[message.from_user.id]['in_stock'] = 'no'
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+    btn1 = types.KeyboardButton('Новый')
+    btn2 = types.KeyboardButton('Б/У')
+    markup.add(btn1, btn2)
+    bot.send_message(message.chat.id, 'Выберите состояние продукта:', reply_markup=markup)
+    bot.register_next_step_handler(message, handle_condition)
+
+# def handle_condition(message):
+#     condition = message.text
+#     user_data[message.from_user.id]['choice'] = 'Новый' if condition == 'Новый' else 'Б/У'
     
-    await update.message.reply_text(f'Ваш ID пользователя: {user.id}')
+#     try:
+#         response = requests.get(MARKA_API_URL)
+#         response.raise_for_status()
+#         marka = response.json()
+#     except requests.RequestException as e:
+#         bot.send_message(message.chat.id, f'Ошибка при получении марки: {e}')
+#         return
+
+#     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+#     for cat in marka:
+#         markup.add(types.KeyboardButton(cat['marka']))
+#     bot.send_message(message.chat.id, 'Выберите модель:', reply_markup=markup)
+#     bot.register_next_step_handler(message, receive_marka)
+
+# def receive_marka(message):
+#     user_data[message.from_user.id]['marka'] = message.text
+#     bot.send_message(message.chat.id, 'Введите номер запасной части:')
+#     bot.register_next_step_handler(message, receive_model)
+# Шаг для выбора марки
+def handle_condition(message):
+    condition = message.text
+    user_data[message.from_user.id]['choice'] = 'Новый' if condition == 'Новый' else 'Б/У'
     
-    keyboard = [
-        [InlineKeyboardButton("Создать продукт", callback_data='create_product')],
-        [InlineKeyboardButton("Добавить категорию", callback_data='add_category')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text('Выберите действие:', reply_markup=reply_markup)
-    return START
-
-async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    action = query.data
-    if action == 'create_product':
-        await query.message.reply_text('Привет! Давайте начнем создание нового продукта. Назовите продукт.')
-        return TITLE
-    elif action == 'add_category':
-        await query.message.reply_text('Введите название новой категории:')
-        return CATEGORY_NAME
-
-async def receive_title(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['title'] = update.message.text
-    await update.message.reply_text('Введите цену продукта:')
-    return PRICE
-
-async def receive_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        context.user_data['price'] = int(update.message.text)
-    except ValueError:
-        await update.message.reply_text('Введите корректное значение для цены.')
-        return PRICE
-    await update.message.reply_text('Введите описание продукта:')
-    return DESCRIPTION
+        response = requests.get(MARKA_API_URL)
+        response.raise_for_status()
+        marka = response.json()
+    except requests.RequestException as e:
+        bot.send_message(message.chat.id, f'Ошибка при получении модель: {e}')
+        return
 
-async def receive_description(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['description'] = update.message.text
-    await update.message.reply_text('Введите артикул продукта:')
-    return ARTIKUL
+    # Создаем клавиатуру с множественным выбором
+    markup = types.InlineKeyboardMarkup()
+    for cat in marka:
+        markup.add(types.InlineKeyboardButton(cat['marka'], callback_data=f"marka:{cat['marka']}"))
+    markup.add(types.InlineKeyboardButton("✅ Завершить выбор", callback_data="finish_selection"))
 
-async def receive_artikul(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        context.user_data['artikul'] = int(update.message.text)
-    except ValueError:
-        await update.message.reply_text('Введите корректное значение для артикула.')
-        return ARTIKUL
-    await update.message.reply_text('Введите год выпуска:')
-    return YEAR
+    # Отправляем сообщение с клавиатурой
+    bot.send_message(message.chat.id, 'Выберите одну или несколько модель и нажмите "Завершить выбор":', reply_markup=markup)
 
-async def receive_year(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        context.user_data['year'] = int(update.message.text)
-    except ValueError:
-        await update.message.reply_text('Введите корректное значение для года.')
-        return YEAR
-    
-    keyboard = [
-        [InlineKeyboardButton("Да", callback_data='yes')],
-        [InlineKeyboardButton("Нет", callback_data='no')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text('Продукт в наличии?', reply_markup=reply_markup)
-    
-    return IN_STOCK
+# Обработчик нажатий кнопок
+@bot.callback_query_handler(func=lambda call: call.data.startswith('marka') or call.data == 'finish_selection')
+def handle_marka_selection(call):
+    user_id = call.from_user.id
 
-async def handle_in_stock(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    in_stock = query.data
-    context.user_data['in_stock'] = in_stock == 'yes'
-    
-    keyboard = [
-        [InlineKeyboardButton("Новый", callback_data='new')],
-        [InlineKeyboardButton("Б/У", callback_data='used')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text('Выберите состояние продукта:', reply_markup=reply_markup)
-    return CONDITION
+    # Инициализируем список марок, если его еще нет
+    if 'selected_marka' not in user_data[user_id]:
+        user_data[user_id]['selected_marka'] = []
 
-async def handle_condition(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    condition = query.data
-    context.user_data['choice'] = 'Новый' if condition == 'new' else 'Б/У'
-    await query.message.reply_text('Введите марку:')
-    return MARKA
+    if call.data.startswith('marka'):
+        # Добавляем или удаляем марку из выбора
+        marka = call.data.split(':')[1]
+        if marka in user_data[user_id]['selected_marka']:
+            user_data[user_id]['selected_marka'].remove(marka)
+            bot.answer_callback_query(call.id, f"Марка {marka} удалена из выбора.")
+        else:
+            user_data[user_id]['selected_marka'].append(marka)
+            bot.answer_callback_query(call.id, f"Марка {marka} добавлена в выбор.")
+    elif call.data == 'finish_selection':
+        # Завершаем выбор
+        selected_marka = user_data[user_id].get('selected_marka', [])
+        if not selected_marka:
+            bot.answer_callback_query(call.id, "Вы не выбрали ни одной модель.")
+            return
 
-async def receive_marka(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['marka'] = update.message.text
-    await update.message.reply_text('Введите модель:')
-    return MODEL
+        bot.send_message(call.message.chat.id, f"Вы выбрали модель: {', '.join(selected_marka)}")
+        bot.send_message(call.message.chat.id, 'Введите номер запасной части:')
+        bot.register_next_step_handler(call.message, receive_spare_part_number)
 
-async def receive_model(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['model'] = update.message.text
-    await update.message.reply_text('Введите номер запасной части:')
-    return SPARE_PART_NUMBER
+        # Удаляем клавиатуру
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
 
-async def receive_spare_part_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['spare_part_number'] = update.message.text
-    await update.message.reply_text('Введите поколение:')
-    return GENERATION
+# def receive_model(message):
+#     user_data[message.from_user.id]['model'] = message.text
+#     bot.send_message(message.chat.id, 'Введите номер запасной части:')
+#     bot.register_next_step_handler(message, receive_spare_part_number)
 
-async def receive_generation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['generation'] = update.message.text
-    
+def receive_spare_part_number(message):
+    user_data[message.from_user.id]['spare_part_number'] = message.text
+    bot.send_message(message.chat.id, 'Введите поколение:')
+    bot.register_next_step_handler(message, receive_generation)
+
+def receive_generation(message):
+    user_id = message.from_user.id
+
+    # Убедимся, что пользовательские данные существуют
+    if user_id not in user_data:
+        user_data[user_id] = {}
+
+    # Сохраняем поколение
+    user_data[user_id]['generation'] = message.text
+
+    # Получаем категории с API
     try:
         response = requests.get(CATEGORY_API_URL)
         response.raise_for_status()
         categories = response.json()
     except requests.RequestException as e:
-        await update.message.reply_text(f'Ошибка при получении категорий: {e}')
-        return ConversationHandler.END
+        bot.send_message(message.chat.id, f'Ошибка при получении категорий: {e}')
+        return
+
+    # Создаем клавиатуру с категориями
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    category_map = {}  # Сопоставление названий категорий с их ID
+    for cat in categories:
+        markup.add(types.KeyboardButton(cat['category']))
+        category_map[cat['category']] = cat['id']
+
+    # Сохраняем карту категорий
+    user_data[user_id]['category_map'] = category_map
+
+    # Отправляем клавиатуру пользователю
+    bot.send_message(message.chat.id, 'Выберите категорию:', reply_markup=markup)
+
+    # Регистрируем следующий шаг
+    bot.register_next_step_handler(message, handle_category_selection)
+
+
+def handle_category_selection(message):
+    user_id = message.from_user.id
+    category_name = message.text
+
+    # Убедимся, что пользователь выбрал существующую категорию
+    category_map = user_data[user_id].get('category_map', {})
+    if category_name in category_map:
+        category_id = category_map[category_name]
+        user_data[user_id]['category'] = category_id
+        user_data[user_id]['marka'] = message.text
+        bot.send_message(
+            message.chat.id,
+            f'Вы выбрали категорию: {category_name} (ID: {category_id}). Теперь отправьте изображения (до 4 изображений).'
+        )
+        # Переходим к следующему шагу
+        bot.register_next_step_handler(message, receive_product_images)
+    else:
+        bot.send_message(message.chat.id, 'Пожалуйста, выберите категорию из предложенного списка.')
+        receive_generation(message)  # Показываем категории снова
+
+@bot.message_handler(content_types=['photo'])
+def receive_product_images(message):
+    user_id = message.from_user.id
+
+    # Убедимся, что пользовательские данные существуют
+    if user_id not in user_data:
+        user_data[user_id] = {}
     
-    keyboard = [[InlineKeyboardButton(cat['category'], callback_data=cat['id'])] for cat in categories]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text('Выберите категорию:', reply_markup=reply_markup)
-    return CATEGORY
+    # Убедимся, что ключ 'image_urls' существует
+    if 'image_urls' not in user_data[user_id]:
+        user_data[user_id]['image_urls'] = []
 
-async def receive_category(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    category_id = int(query.data)
-    context.user_data['category'] = category_id
-    await query.message.reply_text('Теперь отправьте изображения (до 4 изображений).')
-    return PRODUCT_IMAGES
+    try:
+        # Получаем файл
+        file_info = bot.get_file(message.photo[-1].file_id)
+        file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+        user_data[user_id]['image_urls'].append(file_url)
 
-async def receive_product_images(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    if update.message.photo:
-        file = await update.message.photo[-1].get_file()
-        
-        try:
-            file_url = file.file_path
-            context.user_data.setdefault('image_urls', []).append(file_url)
-        except Exception as e:
-            await update.message.reply_text(f'Не удалось загрузить изображение: {e}')
-            return PRODUCT_IMAGES
-
-        if len(context.user_data['image_urls']) < 4:
-            await update.message.reply_text(f'Загружено {len(context.user_data["image_urls"])} изображения. Загрузите следующее фото.')
-            return PRODUCT_IMAGES
+        # Если загружено меньше 4 изображений
+        if len(user_data[user_id]['image_urls']) < 4:
+            bot.send_message(
+                message.chat.id,
+                f"Загружено {len(user_data[user_id]['image_urls'])} изображения(ий). Загрузите следующее фото."
+            )
         else:
-            await update.message.reply_text('Загружено 4 изображения. Завершаем.')
-
+            bot.send_message(message.chat.id, "Загружено 4 изображения. Завершаем.")
+            print(user_data[user_id].get('selected_marka'))
+            # Подготовка данных продукта
             product_data = {
-                'title': context.user_data.get('title'),
-                'price': context.user_data.get('price'),
-                'description': context.user_data.get('description'),
-                'artikul': context.user_data.get('artikul'),
-                'year': context.user_data.get('year'),
-                'in_stock': context.user_data.get('in_stock'),
-                'marka': context.user_data.get('marka'),
-                'model': context.user_data.get('model'),
-                'spare_part_number': context.user_data.get('spare_part_number'),
-                'generation': context.user_data.get('generation'),
-                'choice': context.user_data.get('choice'),
-                'category': context.user_data.get('category'),
+                'title': user_data[user_id].get('title'),
+                'price': user_data[user_id].get('price'),
+                'description': user_data[user_id].get('description'),
+                'artikul': user_data[user_id].get('artikul'),
+                'year': user_data[user_id].get('year'),
+                'in_stock': user_data[user_id].get('in_stock'),
+                'model': ', '.join(user_data[user_id].get('selected_marka', [])),
+                'marka': user_data[user_id].get('marka'),
+                'spare_part_number': user_data[user_id].get('spare_part_number'),
+                'generation': user_data[user_id].get('generation'),
+                'choice': user_data[user_id].get('choice'),
+                'category': user_data[user_id].get('category'),
             }
 
+            # Подготовка файлов
             files = {
-                'image1': (f'Image1.jpg', requests.get(context.user_data['image_urls'][0]).content, 'image/jpeg'),
-                'image2': (f'Image2.jpg', requests.get(context.user_data['image_urls'][1]).content, 'image/jpeg'),
-                'image3': (f'Image3.jpg', requests.get(context.user_data['image_urls'][2]).content, 'image/jpeg'),
-                'image4': (f'Image4.jpg', requests.get(context.user_data['image_urls'][3]).content, 'image/jpeg')
+                f'image{i+1}': (
+                    f'Image{i+1}.jpg',
+                    requests.get(user_data[user_id]['image_urls'][i]).content,
+                    'image/jpeg'
+                ) for i in range(4)
             }
 
             try:
                 response = requests.post(API_URL, data=product_data, files=files)
                 response.raise_for_status()
-                await update.message.reply_text('Продукт успешно создан!')
+                bot.send_message(message.chat.id, "Продукт успешно создан!")
+                bot.register_next_step_handler(message, start)
             except requests.RequestException as e:
-                await update.message.reply_text(f'Произошла ошибка при создании продукта: {e}\nОтвет сервера: {response.text}')
-                    
-            return ConversationHandler.END
+                bot.send_message(
+                    message.chat.id,
+                    f"Произошла ошибка при создании продукта: {e}\nОтвет сервера: {response.text if response else 'Нет ответа'}"
+                )
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Ошибка при обработке изображения: {e}")
+
+
+@bot.message_handler(func=lambda message: message.text == 'Добавить категорию')
+def handle_add_category(message):
+    user_data[message.from_user.id] = {}
+    bot.send_message(message.chat.id, 'Введите название новой категории:')
+    # bot.send_message(message.chat.id, 'Пожалуйста, отправьте изображение.')
+    bot.register_next_step_handler(message, add_category_imagee)
+
+def add_category_imagee(message):
+    user_data[message.from_user.id]['category_name'] = message.text
+    bot.send_message(message.chat.id, 'тепер отправте ижображение')
+    bot.register_next_step_handler(message, add_category_image)
+
+def add_category_image(message):
+    if message.photo:
+        # Получаем изображение
+        file_info = bot.get_file(message.photo[-1].file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+        
+        # Сохраняем изображение в файл
+        file_path = f'/Users/xxxx3231/Desktop/wildberries/{file_info.file_path.split("/")[-1]}'
+        with open(file_path, 'wb') as new_file:
+            new_file.write(downloaded_file)
+        
+        user_data[message.from_user.id]['image'] = file_path
+
+        # Подготовим данные для отправки в API
+        category_name = user_data[message.from_user.id].get('category_name')
+        
+        # Отправка данных (название категории и изображение)
+        files = {'image': open(file_path, 'rb')}
+        data = {'category': category_name}
+        print(files)
+        try:
+            response = requests.post(CATEGORY_API_URL, data=data, files=files)
+            response.raise_for_status()  # Проверка на успешный ответ
+            bot.send_message(message.chat.id, 'Категория добавлена успешно!')
+        except requests.RequestException as e:
+            bot.send_message(message.chat.id, f'Ошибка при добавлении категории: {e}')
+        finally:
+            files['image'].close()  # Закрыть файл
+
     else:
-        await update.message.reply_text('Пожалуйста, отправьте изображение.')
-        return PRODUCT_IMAGES
+        bot.send_message(message.chat.id, 'Пожалуйста, отправьте изображение.')
 
-def main() -> None:
-    application = Application.builder().token(TOKEN).build()
 
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={
-            START: [CallbackQueryHandler(handle_choice)],
-            TITLE: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_title)],
-            PRICE: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_price)],
-            DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_description)],
-            ARTIKUL: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_artikul)],
-            YEAR: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_year)],
-            IN_STOCK: [CallbackQueryHandler(handle_in_stock)],
-            CONDITION: [CallbackQueryHandler(handle_condition)],
-            MARKA: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_marka)],
-            MODEL: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_model)],
-            SPARE_PART_NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_spare_part_number)],
-            GENERATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_generation)],
-            CATEGORY: [CallbackQueryHandler(receive_category)],
-            PRODUCT_IMAGES: [MessageHandler(filters.PHOTO, receive_product_images)],
-        },
-        fallbacks=[],
-    )
+@bot.message_handler(func=lambda message: message.text == 'Создание марки')
+def handle_create_marka(message):
+    bot.send_message(message.chat.id, 'Введите название новой марки:')
+    bot.register_next_step_handler(message, add_marka_name)
 
-    application.add_handler(conv_handler)
-    application.run_polling()
+def add_marka_name(message):
+    # Выводим отладочное сообщение для проверки
+    print(f"User {message.from_user.id} is entering marka name: {message.text}")
+
+    marka_name = message.text
+    try:
+        # Проверка, чтобы не создавать марку несколько раз
+        if message.from_user.id in user_data and 'marka' in user_data[message.from_user.id]:
+            bot.send_message(message.chat.id, 'Вы уже добавили марку.')
+            return
+
+        response = requests.post(MARKA_API_URL, json={"marka": marka_name})
+        response.raise_for_status()
+
+        # Сохраняем информацию о марке в user_data для предотвращения повторного запроса
+        if message.from_user.id not in user_data:
+            user_data[message.from_user.id] = {}
+
+        user_data[message.from_user.id]['marka'] = marka_name
+        bot.send_message(message.chat.id, f'Марка "{marka_name}" успешно создана!')
+    except requests.RequestException as e:
+        bot.send_message(message.chat.id, f'Ошибка при создании марки: {e}')
+        bot.register_next_step_handler(message, start)
 
 if __name__ == '__main__':
-    main()
+    bot.polling(none_stop=True)
+

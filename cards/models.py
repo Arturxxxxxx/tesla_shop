@@ -11,7 +11,6 @@ class Category(models.Model):
         return self.category
 
 class Marka(models.Model):
-    image = models.ImageField(upload_to='marka/', blank=True, null=True)
     marka = models.CharField(max_length=50, unique=True, verbose_name="марка")
 
     def __str__(self):
