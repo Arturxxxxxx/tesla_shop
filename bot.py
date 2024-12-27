@@ -20,7 +20,7 @@ admin = [5573835432, 5469335222]
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    if message.from_user.id == admin:
+    if message.from_user.id in admin:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton('Создать продукт')
         btn2 = types.KeyboardButton('Добавить категорию')
