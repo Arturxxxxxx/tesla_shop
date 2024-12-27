@@ -209,75 +209,252 @@ def handle_category_selection(message):
             f'Вы выбрали категорию: {category_name} (ID: {category_id}). Теперь отправьте изображения (до 4 изображений).'
         )
         # Переходим к следующему шагу
-        bot.register_next_step_handler(message, receive_product_images)
+        bot.register_next_step_handler(message, receive_images)
     else:
         bot.send_message(message.chat.id, 'Пожалуйста, выберите категорию из предложенного списка.')
         receive_generation(message)  # Показываем категории снова
 
-@bot.message_handler(content_types=['photo'])
-def receive_product_images(message):
+@bot.message_handler(content_types=['photo', 'document'])
+def receive_images(message):
     user_id = message.from_user.id
 
     # Убедимся, что пользовательские данные существуют
     if user_id not in user_data:
         user_data[user_id] = {}
-    
+
     # Убедимся, что ключ 'image_urls' существует
     if 'image_urls' not in user_data[user_id]:
         user_data[user_id]['image_urls'] = []
 
     try:
-        # Получаем файл
-        file_info = bot.get_file(message.photo[-1].file_id)
-        file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+        # Обработка фото
+        if message.content_type == 'photo':
+            file_info = bot.get_file(message.photo[-1].file_id)
+            file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+        
+        # Обработка документа
+        elif message.content_type == 'document':
+            file_info = bot.get_file(message.document.file_id)
+            file_extension = message.document.file_name.split('.')[-1].lower()
+            
+            if file_extension not in ['jpg', 'jpeg', 'png']:
+                bot.send_message(message.chat.id, "Поддерживаются только изображения формата JPG, JPEG или PNG.")
+                return
+
+            file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+
+        # Добавление URL файла в список
         user_data[user_id]['image_urls'].append(file_url)
 
-        # Если загружено меньше 4 изображений
-        if len(user_data[user_id]['image_urls']) < 4:
-            bot.send_message(
-                message.chat.id,
-                f"Загружено {len(user_data[user_id]['image_urls'])} изображения(ий). Загрузите следующее фото."
-            )
-        else:
-            bot.send_message(message.chat.id, "Загружено 4 изображения. Завершаем.")
-            print(user_data[user_id].get('selected_marka'))
-            # Подготовка данных продукта
-            product_data = {
-                'title': user_data[user_id].get('title'),
-                'price': user_data[user_id].get('price'),
-                'description': user_data[user_id].get('description'),
-                'artikul': user_data[user_id].get('artikul'),
-                'year': user_data[user_id].get('year'),
-                'in_stock': user_data[user_id].get('in_stock'),
-                'model': ', '.join(user_data[user_id].get('selected_marka', [])),
-                'marka': user_data[user_id].get('marka'),
-                'spare_part_number': user_data[user_id].get('spare_part_number'),
-                'generation': user_data[user_id].get('generation'),
-                'choice': user_data[user_id].get('choice'),
-                'category': user_data[user_id].get('category'),
-            }
+        # Сообщение о количестве загруженных изображений
+        bot.send_message(
+            message.chat.id,
+            f"Загружено {len(user_data[user_id]['image_urls'])} изображение(ий). Вы можете загрузить ещё {4 - len(user_data[user_id]['image_urls'])} или отправить 'Готово' для завершения."
+        )
 
-            # Подготовка файлов
-            files = {
-                f'image{i+1}': (
-                    f'Image{i+1}.jpg',
-                    requests.get(user_data[user_id]['image_urls'][i]).content,
-                    'image/jpeg'
-                ) for i in range(4)
-            }
-
-            try:
-                response = requests.post(API_URL, data=product_data, files=files)
-                response.raise_for_status()
-                bot.send_message(message.chat.id, "Продукт успешно создан!")
-                bot.register_next_step_handler(message, start)
-            except requests.RequestException as e:
-                bot.send_message(
-                    message.chat.id,
-                    f"Произошла ошибка при создании продукта: {e}\nОтвет сервера: {response.text if response else 'Нет ответа'}"
-                )
+        # Если загружено 4 изображения, автоматически завершаем процесс
+        if len(user_data[user_id]['image_urls']) == 4:
+            finalize_product_creation(message)
     except Exception as e:
-        bot.send_message(message.chat.id, f"Ошибка при обработке изображения: {e}")
+        bot.send_message(message.chat.id, f"Ошибка при обработке изображения или документа: {e}")
+
+
+@bot.message_handler(content_types=['text'])
+def finalize_product_creation(message):
+    user_id = message.from_user.id
+
+    # Завершаем процесс только если пользователь отправил "Готово"
+    if message.text.strip().lower() != 'готово':
+        return
+
+    # Проверяем, есть ли загруженные изображения
+    if not user_data[user_id].get('image_urls'):
+        bot.send_message(message.chat.id, "Вы не загрузили ни одного изображения.")
+        return
+
+    bot.send_message(message.chat.id, "Завершаем процесс создания продукта.")
+
+    # Подготовка данных продукта
+    product_data = {
+        'title': user_data[user_id].get('title'),
+        'price': user_data[user_id].get('price'),
+        'description': user_data[user_id].get('description'),
+        'artikul': user_data[user_id].get('artikul'),
+        'year': user_data[user_id].get('year'),
+        'in_stock': user_data[user_id].get('in_stock'),
+        'model': ', '.join(user_data[user_id].get('selected_marka', [])),
+        'marka': user_data[user_id].get('marka'),
+        'spare_part_number': user_data[user_id].get('spare_part_number'),
+        'generation': user_data[user_id].get('generation'),
+        'choice': user_data[user_id].get('choice'),
+        'category': user_data[user_id].get('category'),
+    }
+
+    # Подготовка файлов
+    files = {
+        f'image{i+1}': (
+            f'Image{i+1}.jpg',
+            requests.get(user_data[user_id]['image_urls'][i]).content,
+            'image/jpeg'
+        ) for i in range(len(user_data[user_id]['image_urls']))
+    }
+
+    try:
+        response = requests.post(API_URL, data=product_data, files=files)
+        response.raise_for_status()
+        bot.send_message(message.chat.id, "Продукт успешно создан!")
+        start(message)  # Переход к функции start
+    except requests.RequestException as e:
+        bot.send_message(
+            message.chat.id,
+            f"Произошла ошибка при создании продукта: {e}\nОтвет сервера: {response.text if response else 'Нет ответа'}"
+        )
+
+
+# @bot.message_handler(content_types=['photo', 'document'])
+# def receive_images(message):
+#     user_id = message.from_user.id
+
+#     # Убедимся, что пользовательские данные существуют
+#     if user_id not in user_data:
+#         user_data[user_id] = {}
+
+#     # Убедимся, что ключ 'image_urls' существует
+#     if 'image_urls' not in user_data[user_id]:
+#         user_data[user_id]['image_urls'] = []
+
+#     try:
+#         # Обработка фото
+#         if message.content_type == 'photo':
+#             file_info = bot.get_file(message.photo[-1].file_id)
+#             file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+        
+#         # Обработка документа
+#         elif message.content_type == 'document':
+#             file_info = bot.get_file(message.document.file_id)
+#             file_extension = message.document.file_name.split('.')[-1].lower()
+            
+#             if file_extension not in ['jpg', 'jpeg', 'png']:
+#                 bot.send_message(message.chat.id, "Поддерживаются только изображения формата JPG, JPEG или PNG.")
+#                 return
+
+#             file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+
+#         # Добавление URL файла в список
+#         user_data[user_id]['image_urls'].append(file_url)
+
+#         # Проверка количества изображений
+#         if len(user_data[user_id]['image_urls']) < 4:
+#             bot.send_message(
+#                 message.chat.id,
+#                 f"Загружено {len(user_data[user_id]['image_urls'])} изображения(ий). Загрузите следующее фото."
+#             )
+#         else:
+#             bot.send_message(message.chat.id, "Загружено 4 изображения. Завершаем.")
+
+#             # Подготовка данных продукта
+#             product_data = {
+#                 'title': user_data[user_id].get('title'),
+#                 'price': user_data[user_id].get('price'),
+#                 'description': user_data[user_id].get('description'),
+#                 'artikul': user_data[user_id].get('artikul'),
+#                 'year': user_data[user_id].get('year'),
+#                 'in_stock': user_data[user_id].get('in_stock'),
+#                 'model': ', '.join(user_data[user_id].get('selected_marka', [])),
+#                 'marka': user_data[user_id].get('marka'),
+#                 'spare_part_number': user_data[user_id].get('spare_part_number'),
+#                 'generation': user_data[user_id].get('generation'),
+#                 'choice': user_data[user_id].get('choice'),
+#                 'category': user_data[user_id].get('category'),
+#             }
+
+#             # Подготовка файлов
+#             files = {
+#                 f'image{i+1}': (
+#                     f'Image{i+1}.jpg',
+#                     requests.get(user_data[user_id]['image_urls'][i]).content,
+#                     'image/jpeg'
+#                 ) for i in range(4)
+#             }
+
+#             try:
+#                 response = requests.post(API_URL, data=product_data, files=files)
+#                 response.raise_for_status()
+#                 bot.send_message(message.chat.id, "Продукт успешно создан!")
+#                 start(message)  # Переход к функции start
+#             except requests.RequestException as e:
+#                 bot.send_message(
+#                     message.chat.id,
+#                     f"Произошла ошибка при создании продукта: {e}\nОтвет сервера: {response.text if response else 'Нет ответа'}"
+#                 )
+#     except Exception as e:
+#         bot.send_message(message.chat.id, f"Ошибка при обработке изображения или документа: {e}")
+
+
+# @bot.message_handler(content_types=['photo'])
+# def receive_product_images(message):
+#     user_id = message.from_user.id
+
+#     # Убедимся, что пользовательские данные существуют
+#     if user_id not in user_data:
+#         user_data[user_id] = {}
+    
+#     # Убедимся, что ключ 'image_urls' существует
+#     if 'image_urls' not in user_data[user_id]:
+#         user_data[user_id]['image_urls'] = []
+
+#     try:
+#         # Получаем файл
+#         file_info = bot.get_file(message.photo[-1].file_id)
+#         file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+#         user_data[user_id]['image_urls'].append(file_url)
+
+#         # Если загружено меньше 4 изображений
+#         if len(user_data[user_id]['image_urls']) < 4:
+#             bot.send_message(
+#                 message.chat.id,
+#                 f"Загружено {len(user_data[user_id]['image_urls'])} изображения(ий). Загрузите следующее фото."
+#             )
+#         else:
+#             bot.send_message(message.chat.id, "Загружено 4 изображения. Завершаем.")
+#             print(user_data[user_id].get('selected_marka'))
+#             # Подготовка данных продукта
+#             product_data = {
+#                 'title': user_data[user_id].get('title'),
+#                 'price': user_data[user_id].get('price'),
+#                 'description': user_data[user_id].get('description'),
+#                 'artikul': user_data[user_id].get('artikul'),
+#                 'year': user_data[user_id].get('year'),
+#                 'in_stock': user_data[user_id].get('in_stock'),
+#                 'model': ', '.join(user_data[user_id].get('selected_marka', [])),
+#                 'marka': user_data[user_id].get('marka'),
+#                 'spare_part_number': user_data[user_id].get('spare_part_number'),
+#                 'generation': user_data[user_id].get('generation'),
+#                 'choice': user_data[user_id].get('choice'),
+#                 'category': user_data[user_id].get('category'),
+#             }
+
+#             # Подготовка файлов
+#             files = {
+#                 f'image{i+1}': (
+#                     f'Image{i+1}.jpg',
+#                     requests.get(user_data[user_id]['image_urls'][i]).content,
+#                     'image/jpeg'
+#                 ) for i in range(4)
+#             }
+
+#             try:
+#                 response = requests.post(API_URL, data=product_data, files=files)
+#                 response.raise_for_status()
+#                 bot.send_message(message.chat.id, "Продукт успешно создан!")
+#                 start(message)
+#             except requests.RequestException as e:
+#                 bot.send_message(
+#                     message.chat.id,
+#                     f"Произошла ошибка при создании продукта: {e}\nОтвет сервера: {response.text if response else 'Нет ответа'}"
+#                 )
+#     except Exception as e:
+#         bot.send_message(message.chat.id, f"Ошибка при обработке изображения: {e}")
 
 
 @bot.message_handler(func=lambda message: message.text == 'Добавить категорию')
