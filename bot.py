@@ -16,14 +16,20 @@ user_data = {}
 
 START, TITLE, PRICE, DESCRIPTION, ARTIKUL, YEAR, IN_STOCK, CONDITION, MARKA, MODEL, SPARE_PART_NUMBER, GENERATION, CATEGORY, PRODUCT_IMAGES, CATEGORY_NAME = range(15)
 
+admin = [5573835432, 5469335222]
+
 @bot.message_handler(commands=['start'])
 def start(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton('Создать продукт')
-    btn2 = types.KeyboardButton('Добавить категорию')
-    btn3 = types.KeyboardButton('Создание марки')
-    markup.add(btn1, btn2, btn3)
-    bot.send_message(message.chat.id, 'Выберите действие:', reply_markup=markup)
+    if message.from_user.id == admin:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        btn1 = types.KeyboardButton('Создать продукт')
+        btn2 = types.KeyboardButton('Добавить категорию')
+        btn3 = types.KeyboardButton('Создание марки')
+        markup.add(btn1, btn2, btn3)
+        bot.send_message(message.chat.id, 'Выберите действие:', reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id, 'у вас нет доступ к этому боту')
+
 
 @bot.message_handler(func=lambda message: message.text == 'Создать продукт')
 def handle_create_product(message):
