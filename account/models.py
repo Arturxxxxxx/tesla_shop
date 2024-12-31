@@ -36,7 +36,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, verbose_name='имя', null=True, blank=True)
     last_name = models.CharField(max_length=30, verbose_name='фамилия', blank=True, null=True)
     phone_number = models.CharField(max_length=50, unique=True)
-    verification_code = models.CharField(max_length=6)  # Добавлено поле
+    verification_code = models.CharField(max_length=6, blank=True, null=True)  # Добавлено поле
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False) 
