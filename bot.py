@@ -23,20 +23,20 @@ def start(message):
     if message.from_user.id in admin:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton('Создать продукт')
-        btn2 = types.KeyboardButton('Добавить категорию')
-        btn3 = types.KeyboardButton('Создание марки')
+        btn2 = types.KeyboardButton('Добавить марки')
+        btn3 = types.KeyboardButton('Создание модели')
         markup.add(btn1, btn2, btn3)
         bot.send_message(message.chat.id, 'Выберите действие:', reply_markup=markup)
     else:
         bot.send_message(message.chat.id, 'у вас нет доступ к этому боту')
 
-@bot.message_handler(func=lambda message: message.text == 'Создание марки')
+@bot.message_handler(func=lambda message: message.text == 'Создание модели')
 def handle_create_marka(message):
     print('marka')
     bot.send_message(message.chat.id, 'Введите название новой марки:')
     bot.register_next_step_handler(message, add_marka_name)
 
-@bot.message_handler(func=lambda message: message.text == 'Добавить категорию')
+@bot.message_handler(func=lambda message: message.text == 'Добавить марки')
 def handle_add_category(message):
     user_data[message.from_user.id] = {}
     bot.send_message(message.chat.id, 'Введите название новой категории:')
