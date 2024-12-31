@@ -341,6 +341,8 @@ def add_category_image(message):
                 return
 
             file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+            file_extension = 'jpg'
+            mine_type = 'image/jpeg'
 
         # Обработка документа
         elif message.content_type == 'document':
@@ -357,7 +359,7 @@ def add_category_image(message):
             if file_extension not in ['jpg', 'jpeg', 'png']:
                 bot.send_message(message.chat.id, "Поддерживаются только изображения формата JPG, JPEG или PNG.")
                 return
-
+            mine_type = f'image/{file_extension}'
             file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
 
         # Добавляем URL файла в список
@@ -378,22 +380,6 @@ def add_category_image(message):
     if not category_name:
         bot.send_message(message.chat.id, "Название категории отсутствует. Укажите категорию перед загрузкой изображений.")
         return
-
-
-    # # Загружаем файл и отправляем в API
-    # try:
-    #     image_url = user_data[user_id]['image_category_urls'][-1] 
-    #     print(image_url) # Последнее добавленное изображение
-    #     response = requests.post(
-    #         CATEGORY_API_URL,
-    #         data={'category': category_name},
-    #         files={'image': ('image.jpg', requests.get(image_url).content, 'image/jpeg')}
-    #     )
-    #     print()
-    #     response.raise_for_status()
-    #     bot.send_message(message.chat.id, 'Категория добавлена успешно!')
-    # except requests.RequestException as e:
-    #     bot.send_message(message.chat.id, f'Ошибка при добавлении категории: {e}')  
     
     try:
         # Проверяем данные перед отправкой
@@ -403,19 +389,19 @@ def add_category_image(message):
             return
 
         image_url = user_data[user_id]['image_category_urls'][-1]
-        # bot.send_message(message.chat.id, f"Проверка URL изображения: {image_url}")
+        bot.send_message(message.chat.id, f"Проверка URL изображения: {image_url}")
 
         # Загружаем изображение
         image_content = requests.get(image_url).content
         if not image_content:
             bot.send_message(message.chat.id, "Ошибка: не удалось загрузить содержимое изображения.")
             return
-
+        print(category_name)
         # Отправляем POST-запрос
         response = requests.post(
             CATEGORY_API_URL,
             data={'category': category_name},
-            files={'image': ('image.jpg', image_content, 'image/jpeg')}
+            files={'image': (f'image.{file_extension}', image_content, mine_type)}
         )
         response.raise_for_status()  # Поднимет исключение, если статус код >= 400
         bot.send_message(message.chat.id, 'Категория добавлена успешно!')
