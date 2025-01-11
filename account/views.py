@@ -15,11 +15,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 User = get_user_model()
 
 class UserDetailView(APIView):
-    permission_classes = [IsAuthenticated]  # Требуем аутентификацию для этого view
+    permission_classes = [IsAuthenticated]  
 
     def get(self, request):
-        user = request.user  # Получаем текущего пользователя из request
-        serializer = UserSerializer(user)  # Сериализуем данные пользователя
+        user = request.user 
+        serializer = UserSerializer(user)  
         return Response(serializer.data)  
 
 class RegisterView(APIView):
@@ -28,8 +28,6 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            # Отправка SMS с активационным кодом
-            # send_sms(user.phone_number, f"Your code is: {user.verification_code}")
             return Response({'message': 'Successfully registered! Check your phone for activation.'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -47,7 +45,6 @@ class VerifyCodeView(APIView):
         except User.DoesNotExist:
             return Response({"error": "Invalid phone number or activation code."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Проверка срока действия кода верификации
         if user.is_expired():
             return Response({"error": "Verification code has expired."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -55,9 +52,9 @@ class VerifyCodeView(APIView):
         if user.is_active:
             return Response({"error": "This account is already activated."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.verification_code = ''  # Очищаем активационный код после успешного подтверждения
-        user.expires_at = None       # Очищаем поле expires_at
-        user.is_active = True       # Активируем пользователя
+        user.verification_code = ''  
+        user.expires_at = None       
+        user.is_active = True       
         user.save()
 
         return Response({"message": "Account successfully activated!"}, status=status.HTTP_200_OK)
@@ -83,15 +80,9 @@ class ForgotPasswordPhoneView(APIView):
         serializer = ForgotPasswordSerializer(data=request.data)
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
-
-            # Получаем пользователя
             user = CustomUser.objects.get(phone_number=phone_number)
-
-            # Генерация нового кода верификации
             user.create_verification_code()
             user.save()
-
-            # Отправляем код на телефон пользователя
             send_activation_code.delay(user.verification_code, user.phone_number)
 
             return Response({"message": "Код для восстановления пароля отправлен на ваш номер телефона."}, status=status.HTTP_200_OK)
@@ -112,7 +103,6 @@ class VerifyResetCodeView(APIView):
             if user.is_expired():
                 return Response({"error": "Reset code has expired."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Очистка кода сброса и даты истечения
             user.verification_code = ''  
             user.expires_at = None
             user.save()
@@ -128,12 +118,10 @@ class ResetPasswordView(APIView):
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
             new_password = serializer.validated_data['new_password']
-
-            # Обновление пароля пользователя
             user = CustomUser.objects.get(phone_number=phone_number)
             user.set_password(new_password)
             user.verification_code = ''
-            user.expires_at = None  # Очистка кода после успешного сброса пароля
+            user.expires_at = None  
             user.save()
 
             return Response({"message": "Пароль успешно изменен."}, status=status.HTTP_200_OK)

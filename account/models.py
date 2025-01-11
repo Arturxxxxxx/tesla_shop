@@ -26,7 +26,7 @@ class CustomUserManager(BaseUserManager):
         user = self.create_user(phone_number, password, **extra)
         user.is_staff = True
         user.is_superuser = True
-        user.is_active = True  # Ensure the superuser is active
+        user.is_active = True  
         user.save()
         return user
 
@@ -36,13 +36,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, verbose_name='имя', null=True, blank=True)
     last_name = models.CharField(max_length=30, verbose_name='фамилия', blank=True, null=True)
     phone_number = models.CharField(max_length=50, unique=True)
-    verification_code = models.CharField(max_length=6, blank=True, null=True)  # Добавлено поле
+    verification_code = models.CharField(max_length=6, blank=True, null=True)  
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False) 
     expires_at = models.DateTimeField(null=True, blank=True)
- # Поле для хранения времени истечения срока действия
-     # Required for admin access
+
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = []
@@ -53,7 +52,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         if not self.verification_code:
             self.verification_code = get_random_string(length=6, allowed_chars='0123456789')
         if not self.expires_at:
-            self.expires_at = timezone.now() + timezone.timedelta(minutes=10)  # Установить время истечения срока действия
+            self.expires_at = timezone.now() + timezone.timedelta(minutes=10)  
         super().save(*args, **kwargs)
 
     def is_code_valid(self):

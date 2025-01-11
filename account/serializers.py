@@ -17,7 +17,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'phone_number', 'password', 'password_confirm', 'country']  # Изменено на 'phone_number'
+        fields = ['first_name', 'last_name', 'phone_number', 'password', 'password_confirm', 'country']  
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -29,7 +29,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         first_name = validated_data.get('first_name')
         last_name = validated_data.get('last_name')
         country = validated_data.get('country')
-        # Создаем пользователя с полями phone_number, first_name и last_name
         user = User(
             phone_number=validated_data['phone_number'],
             first_name=first_name,
@@ -39,16 +38,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
 
-        # Создаем запись PhoneNumberVerification с активационным кодом
         verification, created = CustomUser.objects.get_or_create(
             phone_number=user.phone_number
         )
         if not created:
-            verification.create_verification_code()  # Это вызовет метод create_verification_code() который создаст новый verification_code
+            verification.create_verification_code()  
 
-        # Запускаем задачу Celery
-        send_activation_code.delay(verification.verification_code, user.phone_number)  # Изменено на 'phone_number'
-        # print(verification.verification_code)
+        send_activation_code.delay(verification.verification_code, user.phone_number)  
         return user
 
 class CustomTokenRefreshSerializers(TokenRefreshSerializer):
@@ -59,14 +55,11 @@ class CustomTokenRefreshSerializers(TokenRefreshSerializer):
 class CustomTokenObtainPairSerializers(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
-        # Получаем стандартный токен
         token = super().get_token(user)
         print('role')
-        print(f"User role: {user.role}")  # Проверка значения поля role
+        print(f"User role: {user.role}")  
 
-        # Добавляем кастомные поля в токен
-        # token['phone_number'] = user.phone_number
-        token['role'] = user.role   # Добавляем поле role
+        token['role'] = user.role   
 
         return token
     
@@ -88,7 +81,7 @@ class VerifyResetCodeSerializer(serializers.Serializer):
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Неверный номер телефона или код.")
         
-        if not user.is_code_valid():  # Проверка на истечение срока действия кода
+        if not user.is_code_valid():  
             raise serializers.ValidationError("Код подтверждения истек.")
         
         return data

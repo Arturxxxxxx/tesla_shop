@@ -5,21 +5,12 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-def send_sms(phone_number, verification_code):
-    #print(code)
-    
-    # Логин для доступа к платформе smspro.nikita.kg.  
+def send_sms(phone_number, verification_code):    
     login = config('LOGIN')
-    # Пароль для доступа к платформе smspro.nikita.kg. 
     password = config('PASSWORD')
-    # Уникальный идентификатор транзакции. Для каждой отправки он должен быть уникальным.
     transactionId = str(uuid.uuid4())
-    # print(transactionId)
-    # Имя отправителя - должно быть согласовано с администратором smspro.nikita.kg
     sender = config('SENDER')
-    # Текст СМС-сообщения - текст на русском или латинице любой длины (до 800 знаков). 
     text = verification_code
-    # Номер телефона получателя СМС в формате 996ххххххххх. 
     phone = phone_number
 
     xml_data = f"""<?xml version="1.0" encoding="UTF-8"?>
@@ -39,13 +30,10 @@ def send_sms(phone_number, verification_code):
 
     try:
         response = requests.post(url, data=xml_data, headers=headers)
-        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx and 5xx)
-        
-        # Логирование ответа
+        response.raise_for_status()  
         logger.info('Ответ сервера: %s', response.text)
         
         return response.text
     except requests.exceptions.RequestException as e:
-        # Логирование ошибки
         logger.error('Ошибка при отправке SMS: %s', e)
         return None

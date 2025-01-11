@@ -25,7 +25,6 @@ class StartPaymentSessionView(APIView):
         product_ids = request.data.get("product_ids", [])
         account = get_object_or_404(CustomUser, id=request.user.id)
 
-        # Проверка наличия активных продуктов
         products = Product.objects.filter(id__in=product_ids)
         if not products:
             return JsonResponse({"error": "No active products found"}, status=400)
@@ -38,9 +37,7 @@ class StartPaymentSessionView(APIView):
             return JsonResponse({"pay_url": pay_url,
                                  "payment_session": payment_session.session_id,
                                  "order_id": payment_session.order_id})
-            # pay_url = f"https://{PAYLER_HOST}/gapi/Pay?session_id={payment_session.session_id}"
-            # return JsonResponse({"pay_url": pay_url,
-            #                      "payment_session": payment_session.session_id})
+
 
         except Exception as e:
             return JsonResponse({"error": str(e)})
@@ -76,23 +73,12 @@ class FindSessionView(APIView):
             logger.error(f"Ошибка запроса к Payler API: {str(e)}")
             return JsonResponse({"error": "Ошибка запроса к Payler API"}, status=500)
 
-# class LastOrderDetailView(generics.RetrieveAPIView):
-#     serializer_class = OrderSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_object(self):
-#         user = self.request.user
-#         if user.role == 'admin':
-#             return Order.objects.all()
-#         else:# Возвращаем последний заказ клиента
-#             return Order.objects.filter(client=self.request.user).order_by('-order_date').first()
 
 class OrderCreateView(generics.CreateAPIView):
     serializer_class = OrderCreateSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Автоматически добавляем текущего клиента в заказ
         serializer.save(client=self.request.user)
 
 class AdminOrderListView(generics.ListAPIView):
@@ -104,23 +90,11 @@ class AdminOrderListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'admin':  # Убедитесь, что роль 'admin' указана правильно
+        if user.role == 'admin':  
             return Order.objects.all()
-        return Order.objects.none()  # Если не админ, то запрет доступа
+        return Order.objects.none()  
 
 
-# class LastOrderDetailView(generics.RetrieveAPIView):
-#     """
-#     Эндпоинт для клиента — получить последний заказ.
-#     """
-#     serializer_class = OrderSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_object(self):
-#         user = self.request.user
-#         order = Order.objects.filter(client=user).order_by('-order_date').first()
-        
-#         if not order:
             
 from rest_framework.exceptions import NotFound, PermissionDenied
 
@@ -150,17 +124,13 @@ class OrderPatchView(UpdateAPIView):
     serializer_class = OrderSerializer
 
     def get_object(self):
-        # Получаем заказ по id из URL
         order = super().get_object()
-
-        # Проверяем, принадлежит ли заказ текущему пользователю
         if not self.request.user.role == "admin":
             raise PermissionDenied("Вы не можете изменять этот заказ.")
 
         return order
 
     def patch(self, request, *args, **kwargs):
-        # Вызываем обновление данных через стандартный механизм DRF
         return super().patch(request, *args, **kwargs)
     
 class OrderDeleteView(generics.DestroyAPIView):
@@ -171,19 +141,13 @@ class OrderDeleteView(generics.DestroyAPIView):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        # Если пользователь — администратор, возвращаем все заказы
         if self.request.user.role == "admin":
             return Order.objects.all()
 
-        # Если пользователь обычный, возвращаем только его заказы
         return Order.objects.filter(client=self.request.user)
 
     def get_object(self):
-        # Получаем объект через стандартный метод
         order = super().get_object()
-
-        # Проверка прав: администратор может удалить любой заказ
-        # Обычный пользователь может удалять только свои заказы
         if self.request.user.role != "admin" and order.client != self.request.user:
             raise PermissionDenied("Вы не можете удалить этот заказ.")
 

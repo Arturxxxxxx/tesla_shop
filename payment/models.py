@@ -1,5 +1,5 @@
 from django.db import models
-from cards.models import Product  # Импортируем Product из приложения cards
+from cards.models import Product  
 from django.contrib.auth import get_user_model
 from account.models import CustomUser
 from django.utils import timezone
@@ -8,11 +8,10 @@ import uuid
 User = get_user_model()
 
 class PaymentSession(models.Model):
-    # Вместо Account из текущего приложения, используем модель Account из другого приложения
     account = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE, related_name="payment_sessions")  
     products = models.ManyToManyField(Product, related_name='payment_sessions')
     session_id = models.CharField(max_length=100, unique=True)
-    order_id = models.CharField(max_length=100, unique=True)  # Автоматический order_id
+    order_id = models.CharField(max_length=100, unique=True) 
     valid_through = models.DateTimeField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3)
@@ -43,7 +42,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # Цена товара на момент заказа
+    price = models.DecimalField(max_digits=10, decimal_places=2)  
 
     def __str__(self):
         return f"{self.product.title} x {self.quantity} in Order {self.order.order_id}"

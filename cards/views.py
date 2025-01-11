@@ -2,7 +2,6 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Category,Product, Marka
 from .serializers import CategorySerializer,ProductSerializer, MarkaSerializer
-# Create your views here.
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
