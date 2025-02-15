@@ -63,7 +63,7 @@ kiwisolver==1.4.5
 kombu==5.3.7
 magic-filter==1.0.12
 MarkupSafe==2.1.5
-matplotlib==3.8.4
+matplotlib==3.7.5
 mediapipe==0.10.11
 ml-dtypes==0.4.0
 moviepy==1.0.3
