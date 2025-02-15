@@ -76,7 +76,7 @@ opencv-contrib-python==4.9.0.80
 opencv-python==4.10.0.84
 opt-einsum==3.3.0
 packaging==24.1
-pandas==2.2.2
+pandas==2.0.3
 phonenumbers==8.13.38
 pillow==10.4.0
 proglog==0.1.10
