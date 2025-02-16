@@ -22,7 +22,7 @@ EMAIL_HOST_USER = config('EMAIL_USER')
 SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = True
-ALLOWED_HOSTS = ['koreacenter.kg']
+ALLOWED_HOSTS = ['koreacenter.kg', '176.126.164.39']
 
 
 
